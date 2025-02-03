@@ -3,7 +3,7 @@
 import { cn } from '@shared/cn'
 import type { ColumnDef, RowData, Table as TTable } from '@tanstack/react-table'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, memo } from 'react'
 
 import { DataTablePagination } from './data-table-pagination'
 
@@ -94,24 +94,29 @@ export const DataTable = <TData, TValue>({
     columns: processedColumns,
     data
   })
+
+  // memoize the classNames to prevent re-renders
+  const memoizedClassNames = useMemo(() => classNames, [classNames])
+  const emptyStateMemo = useMemo(() => emptyState, [emptyState])
+
   return (
     <div className='space-y-4'>
-      {toolbar?.(table)}
+      {toolbar && toolbar(table)}
       <div className={cn(classNames?.container, 'rounded-md border')}>
         {draggable ? (
           <DraggableTable
             table={table}
             sensors={sensors}
             handleDragEnd={handleDragEnd}
-            classNames={classNames}
+            classNames={memoizedClassNames}
             columnOrder={columnOrder}
           />
         ) : (
           <StaticTable
             table={table}
-            classNames={classNames}
+            classNames={memoizedClassNames}
             columns={processedColumns}
-            emptyState={emptyState}
+            emptyState={emptyStateMemo}
           />
         )}
       </div>

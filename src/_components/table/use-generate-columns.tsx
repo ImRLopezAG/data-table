@@ -41,8 +41,7 @@ export function useGenerateColumns<T>({
                 />
               ),
               enableSorting: false,
-              enableHiding: false,
-              width: 20
+              enableHiding: false
             }
           ]
         : []),

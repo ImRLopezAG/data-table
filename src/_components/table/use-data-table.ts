@@ -20,7 +20,7 @@ import {
   useReactTable,
   VisibilityState
 } from '@tanstack/react-table'
-import { useState } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useSkipper } from './use-skipper'
 
 interface DataTableProps<TData, TValue> {
@@ -56,7 +56,7 @@ export function useDataTable<TData, TValue>({
     useSensor(KeyboardSensor)
   )
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event
     if (active && over && active.id !== over.id) {
       setColumnOrder((columnOrder) => {
@@ -65,7 +65,7 @@ export function useDataTable<TData, TValue>({
         return arrayMove(columnOrder, oldIndex, newIndex)
       })
     }
-  }
+  }, [])
 
   const table = useReactTable({
     data,
@@ -106,10 +106,10 @@ export function useDataTable<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues()
   })
 
-  return {
+  return useMemo(() => ({ table, columnOrder, sensors, handleDragEnd }), [
     table,
-    handleDragEnd,
+    columnOrder,
     sensors,
-    columnOrder
-  }
+    handleDragEnd
+  ])
 }
