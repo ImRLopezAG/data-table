@@ -90,14 +90,10 @@ export function DataTable<TData>({
 		[buildedColumns],
 	);
 
-	const { table, columnOrder, handleDragEnd, sensors } = useDataTable({
+	const { table, columnOrder, handleChangeColumnOrder } = useDataTable({
 		columns: processedColumns,
 		data,
 	});
-
-	// memoize the classNames to prevent re-renders
-	const memoizedClassNames = useMemo(() => classNames, [classNames]);
-	const emptyStateMemo = useMemo(() => emptyState, [emptyState]);
 
 	return (
 		<div className="space-y-4">
@@ -107,17 +103,16 @@ export function DataTable<TData>({
 					<DraggableTable
 						table={table}
 						columnOrder={columnOrder}
-						handleDragEnd={handleDragEnd}
-						classNames={memoizedClassNames}
-						sensors={sensors}
+						handleChangeColumnOrder={handleChangeColumnOrder}
+						classNames={classNames}
 					/>
 				)}
 				{!draggable && (
 					<StaticTable
 						table={table}
-						classNames={memoizedClassNames}
+						classNames={classNames}
 						columns={processedColumns}
-						emptyState={emptyStateMemo}
+						emptyState={emptyState}
 					/>
 				)}
 			</div>

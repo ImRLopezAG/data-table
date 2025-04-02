@@ -21,7 +21,7 @@ interface StaticTableProps<TData> {
 		tableBody?: string
 	}
 }
-
+import { cn } from '@shared/cn'
 export function StaticTable<TData>({
 	table,
 	columns,
@@ -60,7 +60,7 @@ export function StaticTable<TData>({
 							className={classNames?.tableRow}
 						>
 							{row.getVisibleCells().map((cell) => (
-								<TableCell key={cell.id} className={classNames?.tableCell}>
+								<TableCell key={cell.id} className={cn('p-2', classNames?.tableCell)}>
 									{flexRender(cell.column.columnDef.cell, cell.getContext())}
 								</TableCell>
 							))}
@@ -68,7 +68,7 @@ export function StaticTable<TData>({
 					))
 				) : (
 					<TableRow>
-						<TableCell colSpan={columns.length} className='h-24 text-center'>
+						<TableCell colSpan={columns.length} className='p-2 h-24 text-center'>
 							{emptyState}
 						</TableCell>
 					</TableRow>

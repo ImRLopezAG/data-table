@@ -1,13 +1,4 @@
 import {
-	type DragEndEvent,
-	KeyboardSensor,
-	MouseSensor,
-	TouchSensor,
-	useSensor,
-	useSensors,
-} from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
-import {
 	type ColumnDef,
 	type ColumnFiltersState,
 	type SortingState,
@@ -20,7 +11,7 @@ import {
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { useSkipper } from "./use-skipper";
 
 interface DataTableProps<TData, TValue> {
@@ -40,32 +31,6 @@ export function useDataTable<TData, TValue>({
 	);
 	const [data, setData] = useState<TData[]>(initialData);
 	const [, skipAutoResetPageIndex] = useSkipper();
-
-	const sensors = useSensors(
-		useSensor(MouseSensor, {
-			activationConstraint: {
-				distance: 1,
-			},
-		}),
-		useSensor(TouchSensor, {
-			activationConstraint: {
-				delay: 250,
-				tolerance: 5,
-			},
-		}),
-		useSensor(KeyboardSensor),
-	);
-
-	const handleDragEnd = useCallback((event: DragEndEvent) => {
-		const { active, over } = event;
-		if (active && over && active.id !== over.id) {
-			setColumnOrder((columnOrder) => {
-				const oldIndex = columnOrder.indexOf(active.id as string);
-				const newIndex = columnOrder.indexOf(over.id as string);
-				return arrayMove(columnOrder, oldIndex, newIndex);
-			});
-		}
-	}, []);
 
 	const table = useReactTable({
 		data,
@@ -106,8 +71,9 @@ export function useDataTable<TData, TValue>({
 		getFacetedUniqueValues: getFacetedUniqueValues(),
 	});
 
-	return useMemo(
-		() => ({ table, columnOrder, sensors, handleDragEnd }),
-		[table, columnOrder, sensors, handleDragEnd],
-	);
+	return {
+    table,
+    columnOrder,
+    handleChangeColumnOrder: setColumnOrder
+  }
 }

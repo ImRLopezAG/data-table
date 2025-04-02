@@ -25,7 +25,6 @@ const selectionColumn = <TData,>(): ColumnDef<TData> => ({
   id: 'select',
   header: ({ table }) => (
     <Checkbox
-      className='ml-2'
       checked={table.getIsAllPageRowsSelected()}
       onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
     />

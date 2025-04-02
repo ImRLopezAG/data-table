@@ -21,12 +21,12 @@ export const App = () => {
 			</div>
 			<DataTable
 				draggable={draggable}
-				pagination="complex"
+				pagination="simple"
 				data={fakeCommits(200)}
 				toolbar={(table) => (
 					<DataTableToolbar
 						table={table}
-						filter={{ column: "message" }}
+						filter={{ column: "message", placeholder: "Search by message..." }}
 						filters={[
 							{
 								column: "status",
@@ -73,7 +73,10 @@ export const App = () => {
 							header: ({ column }) => (
 								<DataTableColumnHeader column={column} title="Date" />
 							),
-							cell: ({ row }) => row.original.date,
+							cell: ({ row }) => new Intl.DateTimeFormat("en-US", {
+                formatMatcher: 'basic',
+                dateStyle: 'medium'
+              }).format(new Date(row.original.date)),
 						},
 						{
 							accessorKey: "status",
