@@ -1,5 +1,4 @@
 export * from './data-table'
 export * from './data-table-column-header'
-export * from './data-table-pagination'
-export * from './use-generate-columns'
+export * from './with-colums'
 export * from './data-table-toolbar'
