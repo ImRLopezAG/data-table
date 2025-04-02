@@ -11,8 +11,7 @@ import {
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { useState } from "react";
-import { useSkipper } from "./use-skipper";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
@@ -76,4 +75,19 @@ export function useDataTable<TData, TValue>({
     columnOrder,
     handleChangeColumnOrder: setColumnOrder
   }
+}
+
+export function useSkipper() {
+	const shouldSkipRef = useRef(true)
+	const shouldSkip = shouldSkipRef.current
+
+	const skip = useCallback(() => {
+		shouldSkipRef.current = false
+	}, [])
+
+	useEffect(() => {
+		shouldSkipRef.current = true
+	})
+
+	return [shouldSkip, skip] as const
 }
