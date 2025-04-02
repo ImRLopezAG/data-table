@@ -6,9 +6,11 @@ import {
 import { fakeCommits } from "@services/commit";
 import { Checkbox } from "@ui/checkbox";
 import { useState } from "react";
+import { ReactTableDevtools } from '@tanstack/react-table-devtools'
 export const App = () => {
 	const [draggable, setDraggable] = useState(false);
 	const toggleDraggable = () => setDraggable((prev) => !prev);
+	const [table, setTable] = useState(null);
 	return (
 		<section className="p-4">
 			<div className="flex items-baseline gap-4">
@@ -23,23 +25,26 @@ export const App = () => {
 				draggable={draggable}
 				pagination="simple"
 				data={fakeCommits(200)}
-				toolbar={(table) => (
-					<DataTableToolbar
-						table={table}
-						filter={{ column: "message", placeholder: "Search by message..." }}
-						filters={[
-							{
-								column: "status",
-								title: "Status",
-								options: [
-									{ label: "Pending", value: "pending" },
-									{ label: "Success", value: "success" },
-									{ label: "Failed", value: "failed" },
-								],
-							},
-						]}
-					/>
-				)}
+				toolbar={(table) =>{
+					setTable(table);
+					return  (
+						<DataTableToolbar
+							table={table}
+							filter={{ column: "message", placeholder: "Search by message..." }}
+							filters={[
+								{
+									column: "status",
+									title: "Status",
+									options: [
+										{ label: "Pending", value: "pending" },
+										{ label: "Success", value: "success" },
+										{ label: "Failed", value: "failed" },
+									],
+								},
+							]}
+						/>
+					)
+				}}
 				columns={{
 					withSelect: true,
 					columns: [
@@ -89,6 +94,7 @@ export const App = () => {
 					],
 				}}
 			/>
+			<ReactTableDevtools  table={table} />
 		</section>
 	);
 };
