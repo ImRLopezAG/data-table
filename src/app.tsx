@@ -4,9 +4,10 @@ import {
 	DataTableToolbar,
 } from "@components/table";
 import { fakeCommits } from "@services/commit";
+import { ReactTableDevtools } from "@tanstack/react-table-devtools";
 import { Checkbox } from "@ui/checkbox";
 import { useState } from "react";
-import { ReactTableDevtools } from '@tanstack/react-table-devtools'
+import { cn } from "./shared/cn";
 export const App = () => {
 	const [draggable, setDraggable] = useState(false);
 	const toggleDraggable = () => setDraggable((prev) => !prev);
@@ -25,12 +26,26 @@ export const App = () => {
 				draggable={draggable}
 				pagination="simple"
 				data={fakeCommits(200)}
-				toolbar={(table) =>{
+				classNames={{
+					tableRow(row) {
+						const status = row.original.status;
+						return cn({
+							"rounded-3xl": true,
+							"bg-red-500/40": status === "failed",
+							"bg-green-500/40": status === "success",
+							"bg-yellow-500/40": status === "pending",
+						});
+					},
+				}}
+				toolbar={(table) => {
 					setTable(table);
-					return  (
+					return (
 						<DataTableToolbar
 							table={table}
-							filter={{ column: "message", placeholder: "Search by message..." }}
+							filter={{
+								column: "message",
+								placeholder: "Search by message...",
+							}}
 							filters={[
 								{
 									column: "status",
@@ -43,7 +58,7 @@ export const App = () => {
 								},
 							]}
 						/>
-					)
+					);
 				}}
 				columns={{
 					withSelect: true,
@@ -69,7 +84,7 @@ export const App = () => {
 								<DataTableColumnHeader column={column} title="Author" />
 							),
 							cell: ({ row }) => row.original.author,
-              meta: {
+							meta: {
 								editable: true,
 							},
 						},
@@ -78,10 +93,11 @@ export const App = () => {
 							header: ({ column }) => (
 								<DataTableColumnHeader column={column} title="Date" />
 							),
-							cell: ({ row }) => new Intl.DateTimeFormat("en-US", {
-                formatMatcher: 'basic',
-                dateStyle: 'medium'
-              }).format(new Date(row.original.date)),
+							cell: ({ row }) =>
+								new Intl.DateTimeFormat("en-US", {
+									formatMatcher: "basic",
+									dateStyle: "medium",
+								}).format(new Date(row.original.date)),
 						},
 						{
 							accessorKey: "status",
@@ -94,7 +110,7 @@ export const App = () => {
 					],
 				}}
 			/>
-			<ReactTableDevtools  table={table} />
+			<ReactTableDevtools table={table} />
 		</section>
 	);
 };

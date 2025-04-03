@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@shared/cn";
-import type { ColumnDef, Row, Table as TTable } from "@tanstack/react-table";
+import type { ColumnDef, Row, Table as TTable, Header, Cell } from "@tanstack/react-table";
 import { DataTablePagination } from "./data-table-pagination";
 import { DraggableTable } from "./dnd-table";
 import { StaticTable } from "./static-table";
@@ -28,14 +28,14 @@ interface DataTableProps<TData> {
 	pagination?: "simple" | "complex";
 	draggable?: boolean;
 	classNames?: {
-		container?: string;
-		table?: string;
-		tableHeader?: string;
-		tableHead?: string;
-		tableBody?: string;
-		tableRow?: string;
-		tableCell?: string;
-	};
+			container?: string;
+			table?: string;
+			tableHeader?: string;
+			tableHead?: (header: Header<TData, unknown>) => string;
+			tableBody?: string;
+			tableRow?: (row: Row<TData>) => string;
+			tableCell?: (cell: Cell<TData, unknown>) => string;
+		};
 }
 export function DataTable<TData>({
 	columns,

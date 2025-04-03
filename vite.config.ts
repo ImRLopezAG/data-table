@@ -5,8 +5,5 @@ import tailwindcss from '@tailwindcss/vite'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig({
-  plugins: [MillionLint.vite({
-    enabled: true,
-    optimizeDOM: true,
-  }), react(), tailwindcss(), viteTsConfigPaths()],
+  plugins: [react(), tailwindcss(), viteTsConfigPaths()],
 })

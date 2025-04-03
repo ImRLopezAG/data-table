@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import type { CSSProperties } from "react";
 
 import {
@@ -21,7 +21,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { flexRender } from "@tanstack/react-table";
 
-import type { Cell, Header, Table as TTable } from "@tanstack/react-table";
+import type { Cell, Header, Table as TTable, Row, } from "@tanstack/react-table";
 
 import { cn } from "@shared/cn";
 import { Icon } from "@ui/icon";
@@ -39,12 +39,13 @@ interface DraggableTableProps<TData> {
 	columnOrder: string[];
 	handleChangeColumnOrder: (columnOrder: string[]) => void;
 	classNames?: {
+		container?: string;
 		table?: string;
 		tableHeader?: string;
-		tableRow?: string;
-		tableHead?: string;
-		tableCell?: string;
+		tableHead?: (header: Header<TData, unknown>) => string;
 		tableBody?: string;
+		tableRow?: (row: Row<TData>) => string;
+		tableCell?: (cell: Cell<TData, unknown>) => string;
 	};
 }
 
@@ -93,7 +94,7 @@ export function DraggableTable<TData>({
 			<Table className={classNames?.table}>
 				<TableHeader className={classNames?.tableHeader}>
 					{table.getHeaderGroups().map((headerGroup) => (
-						<TableRow key={headerGroup.id} className={classNames?.tableRow}>
+						<TableRow key={headerGroup.id}>
 							<SortableContext
 								items={columnOrder}
 								strategy={horizontalListSortingStrategy}
@@ -102,8 +103,8 @@ export function DraggableTable<TData>({
 									<DraggableTableHeader
 										key={header.id}
 										header={header}
-										className={classNames?.tableHead}
-									/>
+										className={cn(classNames?.tableHead ? classNames.tableHead(header) : '')}
+										/>
 								))}
 							</SortableContext>
 						</TableRow>
@@ -114,13 +115,13 @@ export function DraggableTable<TData>({
 						<TableRow
 							key={row.id}
 							data-state={row.getIsSelected() && "selected"}
-							className={classNames?.tableRow}
+							className={cn(classNames?.tableRow ? classNames.tableRow(row) : '')}
 						>
 							{row.getVisibleCells().map((cell) => (
 								<DragAlongCell
 									key={cell.id}
 									cell={cell}
-									className={classNames?.tableCell}
+									className={cn(classNames?.tableCell ? classNames.tableCell(cell) : '')}
 								/>
 							))}
 						</TableRow>
@@ -155,14 +156,13 @@ function DraggableTableHeader<TData, TValue>({
 		<TableHead
 			ref={setNodeRef}
 			style={style}
-			className={cn(className, "relative [&:has([role=checkbox])]:pl-3")}
+			className={cn(className, "relative [&:has([role=checkbox])]:pl-1")}
 			colSpan={header.colSpan}
 		>
 			<div className="flex items-center justify-between">
 				{header.isPlaceholder
 					? null
 					: flexRender(header.column.columnDef.header, header.getContext())}
-				{/* Add pointer-events-auto to ensure button can receive events */}
 				<div
 					{...attributes}
 					{...listeners}
@@ -195,7 +195,7 @@ function DragAlongCell<TData, TValue>({
 	};
 
 	return (
-		<TableCell ref={setNodeRef} style={style} className={cn('p-3', className)}>
+		<TableCell ref={setNodeRef} style={style} className={cn("p-1", className)}>
 			{flexRender(cell.column.columnDef.cell, cell.getContext())}
 		</TableCell>
 	);
