@@ -24,7 +24,7 @@
 		"paths": {
       "@/*": ["./src/*"],
       "@components/*": ["./src/_components/*"],
-      "@hooks/*": ["./src/_hooks/*"],
+      "@hooks/*": ["./src/hooks/*"],
       "@services/*": ["./src/_services/*"],
       "@ui/*": ["./src/_components/ui/*"],
       "@shared/*": ["./src/shared/*"]

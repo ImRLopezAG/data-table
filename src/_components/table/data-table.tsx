@@ -4,8 +4,8 @@ import type { ColumnDef, Row, Table as TTable, Header, Cell } from "@tanstack/re
 import { DataTablePagination } from "./data-table-pagination";
 import { DraggableTable } from "./dnd-table";
 import { StaticTable } from "./static-table";
-import { useDataTable } from "./use-data-table";
-import { withColumns } from "./with-colums";
+import { useDataTable } from "@hooks/use-data-table";
+import { withColumns } from "./with-columns";
 
 declare module "@tanstack/react-table" {
 	interface ColumnMeta<TData, TValue> {
