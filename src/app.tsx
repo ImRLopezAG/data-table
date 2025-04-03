@@ -3,15 +3,16 @@ import {
 	DataTableColumnHeader,
 	DataTableToolbar,
 } from "@components/table";
-import { fakeCommits } from "@services/commit";
+import { fakeCommits, type Commit } from "@services/commit";
 import { ReactTableDevtools } from "@tanstack/react-table-devtools";
 import { Checkbox } from "@ui/checkbox";
 import { useState } from "react";
 import { cn } from "./shared/cn";
+import type { Table } from "@tanstack/react-table";
 export const App = () => {
 	const [draggable, setDraggable] = useState(false);
 	const toggleDraggable = () => setDraggable((prev) => !prev);
-	const [table, setTable] = useState(null);
+	const [table, setTable] = useState<null | Table<Commit>>(null);
 	return (
 		<section className="p-4">
 			<div className="flex items-baseline gap-4">
@@ -38,7 +39,12 @@ export const App = () => {
 					},
 				}}
 				toolbar={(table) => {
-					setTable(table);
+					// Use useEffect in the parent component to update the table state
+					if (table !== null && table !== undefined) {
+						// Only update when table actually changes and is not null
+						// This avoids the setState during render issue
+						setTimeout(() => setTable(table), 0);
+					}
 					return (
 						<DataTableToolbar
 							table={table}
