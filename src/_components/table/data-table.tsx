@@ -1,9 +1,6 @@
 "use client";
 import { cn } from "@shared/cn";
 import type { ColumnDef, Row, Table as TTable } from "@tanstack/react-table";
-
-import { useEffect, useMemo, useState } from "react";
-
 import { DataTablePagination } from "./data-table-pagination";
 import { DraggableTable } from "./dnd-table";
 import { StaticTable } from "./static-table";
@@ -40,11 +37,6 @@ interface DataTableProps<TData> {
 		tableCell?: string;
 	};
 }
-
-type AccessorColumnDef<TData> = ColumnDef<TData> & {
-	accessorKey: string;
-};
-
 export function DataTable<TData>({
 	columns,
 	data,
@@ -55,43 +47,9 @@ export function DataTable<TData>({
 	draggable,
 }: DataTableProps<TData>) {
 	const buildedColumns = withColumns<TData>(columns);
-	const processedColumns: ColumnDef<TData>[] = useMemo(
-		() =>
-			buildedColumns.map((column) => {
-				const id =
-					column.id ||
-					("accessorKey" in column
-						? (column as unknown as AccessorColumnDef<TData>).accessorKey
-						: `col-${Math.random().toString(36).slice(2, 9)}`);
-				const enhancedColumn: ColumnDef<TData> = {
-					...column,
-					id,
-					...(column.meta?.filterVariant === "multi-select" && {
-						filterFn: (row, columnId, filterValue) => {
-							return filterValue?.includes(row.getValue(columnId));
-						},
-					}),
-				};
-				if (enhancedColumn.meta?.editable) {
-					return {
-						...enhancedColumn,
-						cell: ({ row, column, getValue, table }) => (
-							<EditableCell
-								getValue={getValue}
-								rowIndex={row.index}
-								columnId={column.id}
-								table={table}
-							/>
-						),
-					};
-				}
-				return enhancedColumn;
-			}),
-		[buildedColumns],
-	);
 
 	const { table, columnOrder, handleChangeColumnOrder } = useDataTable({
-		columns: processedColumns,
+		columns: buildedColumns,
 		data,
 	});
 
@@ -111,7 +69,7 @@ export function DataTable<TData>({
 					<StaticTable
 						table={table}
 						classNames={classNames}
-						columns={processedColumns}
+						columns={buildedColumns}
 						emptyState={emptyState}
 					/>
 				)}
@@ -120,35 +78,3 @@ export function DataTable<TData>({
 		</div>
 	);
 }
-
-const EditableCell = <TData, TValue>({
-	getValue,
-	rowIndex,
-	columnId,
-	table,
-}: {
-	getValue: () => TValue;
-	rowIndex: number;
-	columnId: string;
-	table: TTable<TData>;
-}) => {
-	const initialValue = getValue();
-	const [value, setValue] = useState(initialValue);
-
-	const onBlur = () => {
-		table.options.meta?.updateData(rowIndex, columnId, value);
-	};
-
-	useEffect(() => {
-		setValue(initialValue);
-	}, [initialValue]);
-
-	return (
-		<input
-			value={value as string}
-			onChange={(e) => setValue(e.target.value as unknown as TValue)}
-			onBlur={onBlur}
-			className="w-full bg-transparent"
-		/>
-	);
-};
