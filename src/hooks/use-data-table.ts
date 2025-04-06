@@ -11,15 +11,17 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onDataChange?: (data: TData[], changes: TData) => void;
 }
 export function useDataTable<TData, TValue>({
   columns,
-  data: initialData,
+  data,
+  onDataChange,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -28,12 +30,11 @@ export function useDataTable<TData, TValue>({
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>
     columns.map((col) => col.id ?? crypto.randomUUID()),
   );
-  const [data, setData] = useState<TData[]>(initialData);
-  const [, skipAutoResetPageIndex] = useSkipper();
 
   const table = useReactTable({
     data,
     columns: columns,
+    enableRowSelection: true,
     state: {
       sorting,
       columnVisibility,
@@ -43,18 +44,15 @@ export function useDataTable<TData, TValue>({
     },
     meta: {
       updateData: (rowIndex, columnId, value) => {
-        skipAutoResetPageIndex();
-        setData((old) =>
-          old.map((row, index) => {
-            if (index === rowIndex) {
-              return {
-                ...row,
-                [columnId]: value,
-              };
-            }
-            return row;
-          }),
-        );
+        if (onDataChange) {
+          const newData = [...data].map((row, idx) =>
+            idx === rowIndex ? { ...row, [columnId]: value } : row
+          );
+          const changes = {
+            ...newData[rowIndex],
+          };
+          onDataChange(newData, changes);
+        }
       },
     },
     onRowSelectionChange: setRowSelection,
@@ -77,17 +75,3 @@ export function useDataTable<TData, TValue>({
   }
 }
 
-export function useSkipper() {
-  const shouldSkipRef = useRef(true)
-  const shouldSkip = shouldSkipRef.current
-
-  const skip = useCallback(() => {
-    shouldSkipRef.current = false
-  }, [])
-
-  useEffect(() => {
-    shouldSkipRef.current = true
-  })
-
-  return [shouldSkip, skip] as const
-}

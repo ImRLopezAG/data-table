@@ -1,8 +1,7 @@
 "use client";
 import type { ColumnDef, Row, Table } from "@tanstack/react-table";
 import { Checkbox } from "@ui/checkbox";
-import React, { useEffect, useMemo, useState } from "react";
-
+import React, { useEffect, useState } from "react";
 interface Props<TData> {
 	columns: ColumnDef<TData>[];
 	rowAction?: (row: Row<TData>) => React.ReactNode;
@@ -18,47 +17,82 @@ export function withColumns<TData>({
 	rowAction,
 	withSelect,
 }: Props<TData>): Array<ColumnDef<TData>> {
-
-
-	const processedColumns: ColumnDef<TData>[] = useMemo(
-		() =>
-			[
-        ...(withSelect ? [selectionColumn<TData>()] : []),
-        ...columns,
-        ...(rowAction ? [actionColumn<TData>(rowAction)] : []),
-      ].map((column) => {
-				const id =
-					column.id ||
-					("accessorKey" in column
-						? (column as unknown as AccessorColumnDef<TData>).accessorKey
-						: `col-${Math.random().toString(36).slice(2, 9)}`);
-				const enhancedColumn: ColumnDef<TData> = {
-					...column,
-					id,
-					...(column.meta?.filterVariant === "multi-select" && {
-						filterFn: (row, columnId, filterValue) => {
-							return filterValue?.includes(row.getValue(columnId));
-						},
-					}),
-				};
-				if (enhancedColumn.meta?.editable) {
-					return {
-						...enhancedColumn,
-						cell: ({ row, column, getValue, table }) => (
-							<EditableCell
-								getValue={getValue}
-								rowIndex={row.index}
-								columnId={column.id}
-								table={table}
-							/>
-						),
-					};
-				}
-				return enhancedColumn;
+	return [
+		...(withSelect ? [selectionColumn<TData>()] : []),
+		...columns,
+		...(rowAction ? [actionColumn<TData>(rowAction)] : []),
+	].map((column) => {
+		const id =
+			column.id ||
+			("accessorKey" in column
+				? (column as unknown as AccessorColumnDef<TData>).accessorKey
+				: `col-${Math.random().toString(36).slice(2, 9)}`);
+		const enhancedColumn: ColumnDef<TData> = {
+			...column,
+			id,
+			...(column.meta?.filterVariant === "multi-select" && {
+				filterFn: (row, columnId, filterValue: Array<string>) => {
+					return filterValue.includes(row.getValue(columnId));
+				},
 			}),
-		[columns, rowAction, withSelect],
-	);
-	return processedColumns;
+			...(column.meta?.filterVariant === "range" && {
+				filterFn: (row, columnId, filterValue: Array<string>) => {
+					const value = row.getValue(columnId);
+									const parsedValue = parseValue(value);
+					const cleanedFilterValue = filterValue.map((v) => v.trim());
+					return cleanedFilterValue.some((range) => {
+						if (parsedValue instanceof Date) {
+							return dateFilterEvaluation(range, parsedValue);
+						}
+
+						// Fallback: handle number range or string
+						const [minPart, maxPart] = range
+							.split(/(?:-|to|,)/)
+							.map((p) => p.trim());
+
+						if (typeof parsedValue === "number") {
+							const min = Number(minPart);
+							const max = Number(maxPart);
+							return (
+								!Number.isNaN(min) &&
+								!Number.isNaN(max) &&
+								parsedValue >= min &&
+								parsedValue <= max
+							);
+						}
+
+						if (typeof value === "string") {
+							const minNum = Number(minPart);
+							const maxNum = Number(maxPart);
+							if (!Number.isNaN(minNum) && !Number.isNaN(maxNum)) {
+								return value.length >= minNum && value.length <= maxNum;
+							}
+							return (
+								value.localeCompare(minPart) >= 0 &&
+								value.localeCompare(maxPart) <= 0
+							);
+						}
+
+						return false;
+					});
+				},
+			}),
+		};
+		if (enhancedColumn.meta?.editable) {
+			return {
+				...enhancedColumn,
+				cell: ({ row, column, getValue, table }) => (
+					<EditableCell
+						getValue={getValue}
+						rowIndex={row.index}
+						columnId={column.id}
+						table={table}
+					/>
+				),
+			};
+		}
+		return enhancedColumn;
+	});
 }
 
 function selectionColumn<TData>(): ColumnDef<TData> {
@@ -68,30 +102,20 @@ function selectionColumn<TData>(): ColumnDef<TData> {
 			const checked = table.getIsAllPageRowsSelected();
 			const onCheckedChange = React.useCallback(
 				(value: boolean) => table.toggleAllPageRowsSelected(!!value),
-				[table]
+				[table],
 			);
-			return (
-				<Checkbox
-					checked={checked}
-					onCheckedChange={onCheckedChange}
-				/>
-			);
+			return <Checkbox checked={checked} onCheckedChange={onCheckedChange} />;
 		},
 		cell: ({ row }) => {
 			const checked = row.getIsSelected();
 			const onCheckedChange = React.useCallback(
 				(value: boolean) => row.toggleSelected(!!value),
-				[row]
+				[row],
 			);
-			return (
-				<Checkbox
-					checked={checked}
-					onCheckedChange={onCheckedChange}
-				/>
-			);
+			return <Checkbox checked={checked} onCheckedChange={onCheckedChange} />;
 		},
-	}
-};
+	};
+}
 
 // Helper for action column
 const actionColumn = <TData,>(
@@ -100,7 +124,6 @@ const actionColumn = <TData,>(
 	id: "actions",
 	cell: ({ row }) => rowAction(row),
 });
-
 
 interface EditableCellProps<TData, TValue> {
 	getValue: () => TValue;
@@ -134,4 +157,44 @@ const EditableCell = <TData, TValue>({
 			className="w-full bg-transparent"
 		/>
 	);
+};
+
+function dateFilterEvaluation(cleaned: string, value: Date) {
+	const dateRangeMatch = cleaned.match(
+		/^([\d]{4}[-/]\d{2}[-/]\d{2})\s*(?:to|\/|,|–|-)\s*([\d]{4}[-/]\d{2}[-/]\d{2})$/i,
+	);
+	if (dateRangeMatch && dateRangeMatch.length === 3) {
+		const [_, rawMin, rawMax] = dateRangeMatch;
+		const minDate = new Date(rawMin.trim());
+		const maxDate = new Date(rawMax.trim());
+		const evaluation =
+			!Number.isNaN(minDate.getTime()) &&
+			!Number.isNaN(maxDate.getTime()) &&
+			!Number.isNaN(value.getTime());
+		if (evaluation) {
+			const APPLY_TO_FILTER = value >= minDate && value <= maxDate;
+			return APPLY_TO_FILTER;
+		}
+	}
+	return false;
+}
+
+function parseValue(value: unknown) {
+	switch (typeof value) {
+		case "number":
+			return value;
+		case "string": {
+			const date = new Date(value);
+			if (!Number.isNaN(date.getTime())) {
+				return date;
+			}
+			const numberValue = Number(value);
+			if (!Number.isNaN(numberValue)) {
+				return numberValue;
+			}
+			return value;
+		}
+		default:
+			return String(value);
+	}
 }

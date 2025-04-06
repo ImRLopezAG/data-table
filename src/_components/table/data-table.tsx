@@ -1,10 +1,18 @@
 "use client";
+import { useDataTable } from "@hooks/use-data-table";
 import { cn } from "@shared/cn";
-import type { ColumnDef, Row, Table as TTable, Header, Cell } from "@tanstack/react-table";
+import type {
+	Cell,
+	ColumnDef,
+	Header,
+	Row,
+	Table as TTable,
+} from "@tanstack/react-table";
+import { ReactTableDevtools } from "@tanstack/react-table-devtools";
+import { useMemo } from "react";
 import { DataTablePagination } from "./data-table-pagination";
 import { DraggableTable } from "./dnd-table";
 import { StaticTable } from "./static-table";
-import { useDataTable } from "@hooks/use-data-table";
 import { withColumns } from "./with-columns";
 
 declare module "@tanstack/react-table" {
@@ -28,30 +36,27 @@ interface DataTableProps<TData> {
 	pagination?: "simple" | "complex";
 	draggable?: boolean;
 	classNames?: {
-			container?: string;
-			table?: string;
-			tableHeader?: string;
-			tableHead?: (header: Header<TData, unknown>) => string;
-			tableBody?: string;
-			tableRow?: (row: Row<TData>) => string;
-			tableCell?: (cell: Cell<TData, unknown>) => string;
-		};
+		container?: string;
+		table?: string;
+		tableHeader?: string;
+		tableHead?: (header: Header<TData, unknown>) => string;
+		tableBody?: string;
+		tableRow?: (row: Row<TData>) => string;
+		tableCell?: (cell: Cell<TData, unknown>) => string;
+	};
+	devtools?: boolean;
+	onDataChange?: (data: TData[], changes: TData) => void;
 }
-export function DataTable<TData>({
-	columns,
-	data,
-	toolbar,
-	classNames,
-	emptyState,
-	pagination,
-	draggable,
-}: DataTableProps<TData>) {
-	const buildedColumns = withColumns<TData>(columns);
+export function DataTable<TData>(props: DataTableProps<TData>) {
+	const buildedColumns = useMemo(() => withColumns<TData>(props.columns), [props.columns]);
 
 	const { table, columnOrder, handleChangeColumnOrder } = useDataTable({
 		columns: buildedColumns,
-		data,
+		data: props.data,
+		onDataChange: props.onDataChange,
 	});
+
+	const { toolbar, classNames, emptyState, pagination, draggable, devtools } = props;
 
 	return (
 		<div className="space-y-4">
@@ -75,6 +80,7 @@ export function DataTable<TData>({
 				)}
 			</div>
 			{pagination && <DataTablePagination table={table} type={pagination} />}
+			{devtools && <ReactTableDevtools table={table} />}
 		</div>
 	);
 }
