@@ -1,9 +1,9 @@
-import { createGlobalState } from '@/hooks/global.state'
 import {
 	DataTable,
 	DataTableColumnHeader,
 	DataTableToolbar,
 } from '@components/table'
+import { createGlobalState } from '@hooks/global.state'
 import { fakeCommits } from '@services/commit'
 import { Button } from '@ui/button'
 import { Checkbox } from '@ui/checkbox'
@@ -12,13 +12,17 @@ import { useState } from 'react'
 import { dates, status, values } from './lib/utils'
 import { cn } from './shared/cn'
 
+function useCommits() {
+	return createGlobalState('commits', fakeCommits(200))()
+}
+
 export const App = () => {
 	const [draggable, setDraggable] = useState(false)
 	const toggleDraggable = () => setDraggable((prev) => !prev)
 	const { data, refetch, setData } = useCommits()
 
 	return (
-		<section className='p-4'>
+		<section className='space-y-4 p-4'>
 			<div className='flex items-baseline gap-4'>
 				<h1 className='font-bold text-2xl'>Commits</h1>
 				<div className='flex items-center gap-2'>
@@ -33,6 +37,7 @@ export const App = () => {
 					/>
 				</div>
 				<Button
+					size='sm'
 					variant='destructive'
 					onClick={() => {
 						refetch()
@@ -61,33 +66,28 @@ export const App = () => {
 						})
 					},
 				}}
-				toolbar={(table) => {
-					return (
-						<DataTableToolbar
-							table={table}
-							filter={{
-								column: 'message',
-								placeholder: 'Search by message...',
-							}}
-							filters={[
-								{
-									column: 'status',
-									title: 'Status',
-									options: status,
-								},
-								{
-									column: 'date',
-									title: 'Date',
-									options: dates,
-								},
-								{
-									column: 'value',
-									title: 'Value',
-									options: values,
-								},
-							]}
-						/>
-					)
+				toolbar={{
+					filter: {
+						column: 'message',
+						placeholder: 'Search by message...',
+					},
+					filters: [
+						{
+							column: 'status',
+							title: 'Status',
+							options: status,
+						},
+						{
+							column: 'date',
+							title: 'Date',
+							options: dates,
+						},
+						{
+							column: 'value',
+							title: 'Value',
+							options: values,
+						},
+					],
 				}}
 				columns={{
 					withSelect: true,
@@ -154,8 +154,4 @@ export const App = () => {
 			/>
 		</section>
 	)
-}
-
-function useCommits() {
-	return createGlobalState('commits', fakeCommits(200))()
 }

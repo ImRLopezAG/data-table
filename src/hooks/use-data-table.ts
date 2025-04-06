@@ -13,6 +13,16 @@ import {
 } from "@tanstack/react-table";
 import { useState } from "react";
 
+declare module "@tanstack/react-table" {
+  interface ColumnMeta<TData, TValue> {
+    filterVariant?: "text" | "range" | "select" | "multi-select";
+    editable?: boolean;
+  }
+  interface TableMeta<TData> {
+    updateData: (rowIndex: number, columnId: string, value: unknown) => void;
+  }
+}
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];

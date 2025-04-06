@@ -5,6 +5,7 @@ import { Input } from '@ui/input'
 import { Fragment, type JSX } from 'react'
 import { DataTableFacetedFilter } from './data-table-faceted-filter'
 import { DataTableViewOptions } from './data-table-view-options'
+import { cn } from '@shared/cn'
 
 interface DataTableToolbarProps<TData> {
 	createComponent?: React.ReactNode
@@ -23,6 +24,10 @@ interface DataTableToolbarProps<TData> {
 			icon?: React.ComponentType<{ className?: string }>
 		}>
 	}>
+	classNames?: {
+		input?: string
+		content?: string
+	}
 }
 
 export function DataTableToolbar<TData>({
@@ -31,11 +36,12 @@ export function DataTableToolbar<TData>({
 	filters,
 	filter,
 	showViewOptions,
+	classNames,
 }: DataTableToolbarProps<TData>): JSX.Element {
 	const isFiltered = table.getState().columnFilters.length > 0
 
 	return (
-		<div className='flex items-center justify-between'>
+		<div className={cn('flex items-center justify-between', classNames?.content)}>
 			<div className='flex flex-1 items-center space-x-2'>
 				<Input
 					placeholder={filter.placeholder ?? 'Filter...'}
@@ -45,7 +51,7 @@ export function DataTableToolbar<TData>({
 					onChange={({ target: { value } }) =>
 						table.getColumn(filter.column)?.setFilterValue(value)
 					}
-					className='lg:w-[250px]'
+					className={cn('h-9 w-fit', classNames?.input)}
 				/>
 				{createComponent}
 				{filters?.map((filter) => (
