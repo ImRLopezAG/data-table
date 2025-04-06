@@ -17,6 +17,8 @@ declare module "@tanstack/react-table" {
   interface ColumnMeta<TData, TValue> {
     filterVariant?: "text" | "range" | "select" | "multi-select";
     editable?: boolean;
+    filterHeader?: string
+
   }
   interface TableMeta<TData> {
     updateData: (rowIndex: number, columnId: string, value: unknown) => void;

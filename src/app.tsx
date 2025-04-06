@@ -1,7 +1,6 @@
 import {
 	DataTable,
-	DataTableColumnHeader,
-	DataTableToolbar,
+	DataTableColumnHeader
 } from '@components/table'
 import { createGlobalState } from '@hooks/global.state'
 import { fakeCommits } from '@services/commit'
@@ -94,34 +93,29 @@ export const App = () => {
 					columns: [
 						{
 							accessorKey: 'hash',
-							header: 'Hash',
 							cell: ({ row }) => row.original.hash.slice(0, 7),
+							meta: {
+								filterHeader: 'Hash',
+							}
 						},
 						{
 							accessorKey: 'message',
-							header: ({ column }) => (
-								<DataTableColumnHeader column={column} title='Message' />
-							),
 							cell: ({ row }) => row.original.message,
 							meta: {
 								editable: true,
+								filterHeader: 'Message',
 							},
 						},
 						{
 							accessorKey: 'author',
-							header: ({ column }) => (
-								<DataTableColumnHeader column={column} title='Author' />
-							),
 							cell: ({ row }) => row.original.author,
 							meta: {
 								editable: true,
+								filterHeader: 'Author',
 							},
 						},
 						{
 							accessorKey: 'date',
-							header: ({ column }) => (
-								<DataTableColumnHeader column={column} title='Date' />
-							),
 							cell: ({ row }) =>
 								new Intl.DateTimeFormat('en-US', {
 									formatMatcher: 'basic',
@@ -129,16 +123,15 @@ export const App = () => {
 								}).format(new Date(row.original.date)),
 							meta: {
 								filterVariant: 'range',
+								filterHeader: 'Date',
 							},
 						},
 						{
 							accessorKey: 'value',
-							header: ({ column }) => (
-								<DataTableColumnHeader column={column} title='Value' />
-							),
 							cell: ({ row }) => row.original.value,
 							meta: {
 								filterVariant: 'range',
+								filterHeader: 'Value',
 							},
 						},
 						{
@@ -147,6 +140,7 @@ export const App = () => {
 							cell: ({ row }) => row.original.status,
 							meta: {
 								filterVariant: 'multi-select',
+								
 							},
 						},
 					],
