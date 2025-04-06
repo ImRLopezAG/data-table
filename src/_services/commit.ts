@@ -7,15 +7,20 @@ export interface Commit {
   status: 'success' | 'failed' | 'pending'
   author: string
   company: string
+  value: number
 }
 
 const fakeCommit = (): Commit => ({
   hash: faker.git.commitSha(),
   message: faker.git.commitMessage(),
-  date: faker.git.commitDate(),
-  status: faker.helpers.shuffle(['success', 'failed', 'pending'])[0],
+  date: faker.date.between({
+    from: new Date(2000, 1, 1),
+    to: new Date(2025, 1, 1)
+  }).toString(),
+  status: faker.helpers.arrayElement(['success', 'failed', 'pending']),
   author: faker.person.fullName(),
-  company: faker.company.name()
+  company: faker.company.name(),
+  value: faker.number.int({ min: 0, max: 1000 }),
 })
 
 export const fakeCommits = (count: number) =>
