@@ -1,3 +1,4 @@
+import { cn } from '@shared/cn'
 import type { Table } from '@tanstack/react-table'
 import { Button } from '@ui/button'
 import { Icon } from '@ui/icon'
@@ -5,7 +6,6 @@ import { Input } from '@ui/input'
 import { Fragment, type JSX } from 'react'
 import { DataTableFacetedFilter } from './data-table-faceted-filter'
 import { DataTableViewOptions } from './data-table-view-options'
-import { cn } from '@shared/cn'
 
 interface DataTableToolbarProps<TData> {
 	createComponent?: React.ReactNode
@@ -41,7 +41,9 @@ export function DataTableToolbar<TData>({
 	const isFiltered = table.getState().columnFilters.length > 0
 
 	return (
-		<div className={cn('flex items-center justify-between', classNames?.content)}>
+		<div
+			className={cn('flex items-center justify-between', classNames?.content)}
+		>
 			<div className='flex flex-1 items-center space-x-2'>
 				<Input
 					placeholder={filter.placeholder ?? 'Filter...'}
@@ -58,6 +60,7 @@ export function DataTableToolbar<TData>({
 					<Fragment key={filter.column}>
 						{table.getColumn(filter.column) && (
 							<DataTableFacetedFilter
+								table={table}
 								column={table.getColumn(filter.column)}
 								title={filter.title}
 								options={filter.options}

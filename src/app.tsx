@@ -1,7 +1,4 @@
-import {
-	DataTable,
-	DataTableColumnHeader
-} from '@components/table'
+import { DataTable } from '@components/table'
 import { createGlobalState } from '@hooks/global.state'
 import { fakeCommits } from '@services/commit'
 import { Button } from '@ui/button'
@@ -96,7 +93,7 @@ export const App = () => {
 							cell: ({ row }) => row.original.hash.slice(0, 7),
 							meta: {
 								filterHeader: 'Hash',
-							}
+							},
 						},
 						{
 							accessorKey: 'message',
@@ -140,7 +137,6 @@ export const App = () => {
 							cell: ({ row }) => row.original.status,
 							meta: {
 								filterVariant: 'multi-select',
-								
 							},
 						},
 					],
