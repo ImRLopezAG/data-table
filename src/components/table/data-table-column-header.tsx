@@ -1,7 +1,7 @@
 import type { Column } from "@tanstack/react-table";
 import { Icon } from "@ui/icon";
 
-import { cn } from "@shared/cn";
+import { cn } from "@lib/utils";
 import { Button } from "@ui/button";
 import {
 	DropdownMenu,

@@ -7,7 +7,7 @@ import {
 	TableRow,
 } from "@ui/table";
 
-import { cn } from "@shared/cn";
+import { cn } from "@lib/utils";
 import type {
 	Cell,
 	ColumnDef,

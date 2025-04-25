@@ -6,7 +6,7 @@ import { Checkbox } from '@ui/checkbox'
 import { Label } from '@ui/label'
 import { useState } from 'react'
 import { dates, status, values } from './lib/utils'
-import { cn } from './shared/cn'
+import { cn } from '@lib/utils'
 
 function useCommits() {
 	return createGlobalState('commits', fakeCommits(200))()
@@ -146,3 +146,5 @@ export const App = () => {
 		</section>
 	)
 }
+
+export default App

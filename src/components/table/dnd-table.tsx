@@ -21,9 +21,9 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { flexRender } from "@tanstack/react-table";
 
-import type { Cell, Header, Table as TTable, Row, } from "@tanstack/react-table";
+import type { Cell, Header, Row, Table as TTable } from "@tanstack/react-table";
 
-import { cn } from "@shared/cn";
+import { cn } from "@lib/utils";
 import { Icon } from "@ui/icon";
 import {
 	Table,
@@ -103,8 +103,10 @@ export function DraggableTable<TData>({
 									<DraggableTableHeader
 										key={header.id}
 										header={header}
-										className={cn(classNames?.tableHead ? classNames.tableHead(header) : '')}
-										/>
+										className={cn(
+											classNames?.tableHead ? classNames.tableHead(header) : "",
+										)}
+									/>
 								))}
 							</SortableContext>
 						</TableRow>
@@ -115,13 +117,17 @@ export function DraggableTable<TData>({
 						<TableRow
 							key={row.id}
 							data-state={row.getIsSelected() && "selected"}
-							className={cn(classNames?.tableRow ? classNames.tableRow(row) : '')}
+							className={cn(
+								classNames?.tableRow ? classNames.tableRow(row) : "",
+							)}
 						>
 							{row.getVisibleCells().map((cell) => (
 								<DragAlongCell
 									key={cell.id}
 									cell={cell}
-									className={cn(classNames?.tableCell ? classNames.tableCell(cell) : '')}
+									className={cn(
+										classNames?.tableCell ? classNames.tableCell(cell) : "",
+									)}
 								/>
 							))}
 						</TableRow>
@@ -200,3 +206,6 @@ function DragAlongCell<TData, TValue>({
 		</TableCell>
 	);
 }
+
+
+export default DraggableTable;
