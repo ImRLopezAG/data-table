@@ -9,7 +9,6 @@ import * as CMD from '@ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@ui/popover'
 import { Separator } from '@ui/separator'
 import type { JSX } from 'react'
-import { rangeFilter } from './helpers'
 
 interface DataTableFacetedFilterProps<TData> {
 	column?: Column<TData>

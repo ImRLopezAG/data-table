@@ -49,7 +49,6 @@ export const App = () => {
 					setData(data)
 					console.log({ changes })
 				}}
-				pagination='simple'
 				data={data ?? []}
 				classNames={{
 					tableRow(row) {
@@ -61,29 +60,6 @@ export const App = () => {
 							'bg-yellow-500/40': status === 'pending',
 						})
 					},
-				}}
-				toolbar={{
-					filter: {
-						column: 'message',
-						placeholder: 'Search by message...',
-					},
-					filters: [
-						{
-							column: 'status',
-							title: 'Status',
-							options: status,
-						},
-						{
-							column: 'date',
-							title: 'Date',
-							options: dates,
-						},
-						{
-							column: 'value',
-							title: 'Value',
-							options: values,
-						},
-					],
 				}}
 				columns={{
 					withSelect: true,
@@ -141,7 +117,32 @@ export const App = () => {
 						},
 					],
 				}}
-			/>
+			>
+				<DataTable.Toolbar
+					filter={{
+						column: 'message',
+						placeholder: 'Search by message...',
+					}}
+					filters={[
+						{
+							column: 'status',
+							title: 'Status',
+							options: status,
+						},
+						{
+							column: 'date',
+							title: 'Date',
+							options: dates,
+						},
+						{
+							column: 'value',
+							title: 'Value',
+							options: values,
+						},
+					]}
+				/>
+				<DataTable.Pagination type='simple' />
+			</DataTable>
 		</section>
 	)
 }

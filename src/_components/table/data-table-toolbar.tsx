@@ -7,7 +7,7 @@ import { Fragment, type JSX } from 'react'
 import { DataTableFacetedFilter } from './data-table-faceted-filter'
 import { DataTableViewOptions } from './data-table-view-options'
 
-interface DataTableToolbarProps<TData> {
+export interface DataTableToolbarProps<TData> {
 	createComponent?: React.ReactNode
 	table: Table<TData>
 	filter: {

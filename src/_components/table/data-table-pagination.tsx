@@ -10,7 +10,7 @@ import {
 	SelectValue,
 } from '@ui/select'
 
-interface DataTablePaginationProps<TData> {
+export interface DataTablePaginationProps<TData> {
 	table: Table<TData>
 	type: 'simple' | 'complex'
 }

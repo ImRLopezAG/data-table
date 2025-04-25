@@ -1,102 +1,122 @@
+// data-table.tsx
 'use client'
-import { useDataTable } from '@hooks/use-data-table'
+import { useDataTable } from './use-data-table'
 import { cn } from '@shared/cn'
-import type {
-	Cell,
-	ColumnDef,
-	Header,
-	Row,
-	Table as TTable,
-} from '@tanstack/react-table'
+import type { Cell, ColumnDef, Header, Row, Table } from '@tanstack/react-table'
 import { ReactTableDevtools } from '@tanstack/react-table-devtools'
-import { useMemo } from 'react'
-import { DataTablePagination } from './data-table-pagination'
-import { DataTableToolbar } from './data-table-toolbar'
+import React, { createContext, use } from 'react'
+import { DataTablePagination, type DataTablePaginationProps } from './data-table-pagination'
+import { DataTableToolbar, type DataTableToolbarProps } from './data-table-toolbar'
 import { DraggableTable } from './dnd-table'
 import { StaticTable } from './static-table'
 import { withColumns } from './with-columns'
 
 interface DataTableProps<TData> {
-	columns: {
-		withSelect?: boolean
-		columns: ColumnDef<TData>[]
-		rowAction?: (row: Row<TData>) => React.ReactNode
-	}
-	data: TData[]
-	toolbar?: {
-		createComponent?: React.ReactNode
-		filter: {
-			placeholder?: string
-			column: string
-		}
-		showViewOptions?: boolean
-		filters?: Array<{
-			column: string
-			title?: string
-			options: Array<{
-				label: string
-				value: string
-				icon?: React.ComponentType<{ className?: string }>
-			}>
-		}>
-		classNames?: {
-			input?: string
-			content?: string
-		}
-	}
-	emptyState?: React.ReactNode
-	pagination?: 'simple' | 'complex'
-	draggable?: boolean
-	classNames?: {
-		container?: string
-		table?: string
-		tableHeader?: string
-		tableHead?: (header: Header<TData, unknown>) => string
-		tableBody?: string
-		tableRow?: (row: Row<TData>) => string
-		tableCell?: (cell: Cell<TData, unknown>) => string
-	}
-	devtools?: boolean
-	onDataChange?: (data: TData[], changes: TData) => void
+  data: TData[]
+  columns: {
+    withSelect?: boolean
+    columns: ColumnDef<TData>[]
+    rowAction?: (row: Row<TData>) => React.ReactNode
+  }
+  emptyState?: React.ReactNode
+  draggable?: boolean
+  classNames?: {
+    container?: string
+    table?: string
+    tableHeader?: string
+    tableHead?: (header: Header<TData, unknown>) => string
+    tableBody?: string
+    tableRow?: (row: Row<TData>) => string
+    tableCell?: (cell: Cell<TData, unknown>) => string
+  }
+  devtools?: boolean
+  onDataChange?: (data: TData[], changes: TData) => void
+  children?: React.ReactNode
 }
-export function DataTable<TData>(props: DataTableProps<TData>) {
-	const buildedColumns = useMemo(
-		() => withColumns<TData>(props.columns),
-		[props.columns],
-	)
 
-	const { table, columnOrder, handleChangeColumnOrder } = useDataTable({
-		columns: buildedColumns,
-		data: props.data,
-		onDataChange: props.onDataChange,
-	})
+type DataTableContextType<TData> = {
+  table: Table<TData>
+}
 
-	const { toolbar, classNames, emptyState, pagination, draggable, devtools } =
-		props
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+const DataTableContext = createContext<DataTableContextType<any> | null>(null)
 
-	return (
-		<div className='space-y-4'>
-			{toolbar && <DataTableToolbar table={table} {...toolbar} />}
-			<div className={cn(classNames?.container, 'rounded-md border')}>
-				{draggable && (
-					<DraggableTable
-						table={table}
-						columnOrder={columnOrder}
-						handleChangeColumnOrder={handleChangeColumnOrder}
-						classNames={classNames}
-					/>
-				)}
-				{!draggable && (
-					<StaticTable
-						table={table}
-						classNames={classNames}
-						columns={buildedColumns}
-						emptyState={emptyState}
-					/>
-				)}
-			</div>
-			{pagination && <DataTablePagination table={table} type={pagination} />}
-			{devtools && <ReactTableDevtools table={table} />}
-		</div>
-	)
+// data-table.tsx
+export function DataTable<TData>({ children, ...props }: DataTableProps<TData>) {
+  const buildedColumns = React.useMemo(
+    () => withColumns<TData>(props.columns),
+    [props.columns]
+  )
+
+  const { table, columnOrder, handleChangeColumnOrder } = useDataTable({
+    columns: buildedColumns,
+    data: props.data,
+    onDataChange: props.onDataChange,
+  })
+
+  // Split children into their respective components
+  const toolbarChildren = React.Children.toArray(children).filter(child =>
+    React.isValidElement(child) && child.type === DataTable.Toolbar
+  )
+  
+  const paginationChildren = React.Children.toArray(children).filter(child =>
+    React.isValidElement(child) && child.type === DataTable.Pagination
+  )
+
+  return (
+    <DataTableContext.Provider value={{ table }}>
+      <div className='space-y-4'>
+        {/* Render Toolbar first */}
+        {toolbarChildren}
+        
+        {/* Table container */}
+        <div className={cn(props.classNames?.container, 'rounded-md border')}>
+          {props.draggable ? (
+            <DraggableTable
+              table={table}
+              columnOrder={columnOrder}
+              handleChangeColumnOrder={handleChangeColumnOrder}
+              classNames={props.classNames}
+            />
+          ) : (
+            <StaticTable
+              table={table}
+              classNames={props.classNames}
+              columns={buildedColumns}
+              emptyState={props.emptyState}
+            />
+          )}
+        </div>
+
+        {/* Render Pagination after table */}
+        {paginationChildren}
+
+        {props.devtools && <ReactTableDevtools table={table} />}
+      </div>
+    </DataTableContext.Provider>
+  )
+}
+// Helper hook to access context
+function useDataTableContext() {
+  const context = use(DataTableContext)
+  if (!context) {
+    throw new Error('useDataTableContext must be used within a DataTable')
+  }
+  return context
+}
+
+// Toolbar compound component
+DataTable.Toolbar = function DT_Toolbar<TData>(
+  props: Omit<DataTableToolbarProps<TData>, 'table'>
+) {
+  const { table } = useDataTableContext()
+  return <DataTableToolbar table={table} {...props} />
+}
+
+// Pagination compound component
+DataTable.Pagination = function DT_Pagination<TData>(
+  props: Omit<DataTablePaginationProps<TData>, 'table'>
+) {
+  const { table } = useDataTableContext()
+  return <DataTablePagination table={table} {...props} />
 }
