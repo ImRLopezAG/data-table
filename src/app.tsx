@@ -1,15 +1,18 @@
 import { DataTable } from '@components/table'
 import { createGlobalState } from '@hooks/global.state'
-import { fakeCommits } from '@services/commit'
 import { Button } from '@ui/button'
 import { Checkbox } from '@ui/checkbox'
 import { Label } from '@ui/label'
 import { useState } from 'react'
 import { dates, status, values } from './lib/utils'
 import { cn } from '@lib/utils'
+import type { Commit } from './_services/commit'
 
 function useCommits() {
-	return createGlobalState('commits', fakeCommits(200))()
+	return createGlobalState('commits', fetch('/api/commits?count=500').then(async (res) => {
+    const json = await res.json()
+    return json.data as Array<Commit>
+  }))()
 }
 
 export const App = () => {
@@ -46,7 +49,8 @@ export const App = () => {
 				draggable={draggable}
 				devtools
 				onDataChange={(data, changes) => {
-					setData(data)
+					//@ts-ignore
+          setData(data)
 					console.log({ changes })
 				}}
 				data={data ?? []}

@@ -1,8 +1,9 @@
 import { serve } from "bun";
 import index from "./index.html";
+import { fakeCommits } from '@services/commit'
 
 const server = serve({
-  port: 3001,
+  port: 3000,
   routes: {
     // Serve index.html for all unmatched routes.
     "/*": index,
@@ -26,6 +27,13 @@ const server = serve({
       const name = req.params.name;
       return Response.json({
         message: `Hello, ${name}!`,
+      });
+    },
+    "/api/commits": async (req) => {
+      const { searchParams } = new URL(req.url);
+      const count = searchParams.get("count") ?? 10;
+      return Response.json({
+        data: fakeCommits(Number(count))
       });
     },
   },
