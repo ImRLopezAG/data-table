@@ -23,8 +23,7 @@ import { flexRender } from "@tanstack/react-table";
 
 import type { Cell, Header, Row, Table as TTable } from "@tanstack/react-table";
 
-import { cn } from "@lib/utils";
-import { Icon } from "@ui/icon";
+import { Icon } from "@/components/ui/icon";
 import {
 	Table,
 	TableBody,
@@ -32,9 +31,10 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@ui/table";
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
-interface DraggableTableProps<TData> {
+export interface DraggableTableProps<TData> {
 	table: TTable<TData>;
 	columnOrder: string[];
 	handleChangeColumnOrder: (columnOrder: string[]) => void;

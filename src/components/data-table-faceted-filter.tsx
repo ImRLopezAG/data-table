@@ -1,13 +1,13 @@
-import { cn } from "@lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+import { cn } from "@/lib/utils";
 import type { Column, Table } from "@tanstack/react-table";
-import { Badge } from "@ui/badge";
-import { Button } from "@ui/button";
-import { Icon } from "@ui/icon";
 
-import * as CMD from "@ui/command";
+import * as CMD from "@/components/ui/command";
 
-import { Popover, PopoverContent, PopoverTrigger } from "@ui/popover";
-import { Separator } from "@ui/separator";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 import type { JSX } from "react";
 
 interface DataTableFacetedFilterProps<TData> {

@@ -1,8 +1,8 @@
-import { cn } from "@lib/utils";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import type { Table } from "@tanstack/react-table";
-import { Button } from "@ui/button";
-import { Icon } from "@ui/icon";
-import { Input } from "@ui/input";
 import { Fragment, type JSX } from "react";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { DataTableViewOptions } from "./data-table-view-options";
@@ -85,3 +85,5 @@ export function DataTableToolbar<TData>({
 		</div>
 	);
 }
+
+export default DataTableToolbar;

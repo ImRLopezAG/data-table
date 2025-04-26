@@ -1,10 +1,10 @@
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import type { Table } from '@tanstack/react-table'
 
-import { Icon } from '@ui/icon'
+import { Icon } from '@/components/ui/icon'
 
-import { Button } from '@ui/button'
-import * as DM from '@ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import * as DM from '@/components/ui/dropdown-menu'
 
 import type { JSX } from 'react'
 

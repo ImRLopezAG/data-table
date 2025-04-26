@@ -1,5 +1,6 @@
 "use client";
-import { cn } from "@lib/utils";
+import { useDataTable } from "@/hooks/use-data-table";
+import { cn } from "@/lib/utils";
 import type {
 	Cell,
 	ColumnDef,
@@ -7,23 +8,17 @@ import type {
 	Row,
 	Table,
 } from "@tanstack/react-table";
-import { ReactTableDevtools } from "@tanstack/react-table-devtools";
 import React, { createContext, use } from "react";
-import type {
-	DataTablePaginationProps,
-} from "./data-table-pagination";
-import type {
-	DataTableToolbarProps,
-} from "./data-table-toolbar";
-import { StaticTable } from "./static-table";
-import { useDataTable } from "./use-data-table";
-import { withColumns } from "./with-columns";
+import type { DataTablePaginationProps } from "./data-table-pagination";
+import { StaticTable } from "./data-table-static";
+import type { DataTableToolbarProps } from "./data-table-toolbar";
+import { withColumns } from "./data-table-with-columns";
 
-import { lazy, Suspense } from 'react'
+import { Suspense, lazy } from "react";
 
-const LazyDataTablePagination = lazy(() => import("./data-table-pagination").then(module => ({ default: module.DataTablePagination })));
-const LazyDataTableToolbar = lazy(() => import("./data-table-toolbar").then(module => ({ default: module.DataTableToolbar })));
-const LazyDraggableTable = lazy(() => import("./dnd-table").then(module => ({ default: module.DraggableTable })));
+const LazyDataTablePagination = lazy(() => import("./data-table-pagination"));
+const LazyDataTableToolbar = lazy(() => import("./data-table-toolbar"));
+
 interface DataTableProps<TData> {
 	data: TData[];
 	columns: {
@@ -86,28 +81,15 @@ export function DataTable<TData>({
 				{toolbarChildren}
 
 				<div className={cn(props.classNames?.container, "rounded-md border")}>
-					{props.draggable ? (
-						<Suspense fallback={<div>Loading...</div>}>
-							<LazyDraggableTable
-								table={table}
-								columnOrder={columnOrder}
-								handleChangeColumnOrder={handleChangeColumnOrder}
-								classNames={props.classNames}
-							/>
-						</Suspense>
-					) : (
-						<StaticTable
-							table={table}
-							classNames={props.classNames}
-							columns={buildedColumns}
-							emptyState={props.emptyState}
-						/>
-					)}
+					<StaticTable
+						table={table}
+						classNames={props.classNames}
+						columns={buildedColumns}
+						emptyState={props.emptyState}
+					/>
 				</div>
 
 				{paginationChildren}
-
-				{props.devtools && <ReactTableDevtools table={table} />}
 			</div>
 		</DataTableContext.Provider>
 	);
@@ -130,7 +112,7 @@ DataTable.Toolbar = function DT_Toolbar<TData>(
 		<Suspense fallback={<div>Loading...</div>}>
 			<LazyDataTableToolbar table={table} {...props} />
 		</Suspense>
-	)
+	);
 };
 
 // Pagination compound component

@@ -1,15 +1,15 @@
+import { Icon } from "@/components/ui/icon";
 import type { Column } from "@tanstack/react-table";
-import { Icon } from "@ui/icon";
 
-import { cn } from "@lib/utils";
-import { Button } from "@ui/button";
+import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 interface DataTableColumnHeaderProps<TData>
 	extends React.HTMLAttributes<HTMLDivElement> {

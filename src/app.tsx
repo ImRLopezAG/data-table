@@ -1,17 +1,17 @@
-import { DataTable } from '@components/table'
-import { createGlobalState } from '@hooks/global.state'
-import { Button } from '@ui/button'
-import { Checkbox } from '@ui/checkbox'
-import { Label } from '@ui/label'
+import { DataTable } from '@/components/data-table-dnd'
+import { createGlobalState } from '@/hooks/global.state'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 import { dates, status, values } from './lib/utils'
-import { cn } from '@lib/utils'
-import type { Commit } from './_services/commit'
+import { cn } from '@/lib/utils'
+import type { Commit } from '@/services/commit'
 
 function useCommits() {
 	return createGlobalState('commits', fetch('/api/commits?count=500').then(async (res) => {
-    const json = await res.json()
-    return json.data as Array<Commit>
+    const json = await res.json() as { data: Commit[] }
+    return json.data 
   }))()
 }
 
@@ -38,6 +38,7 @@ export const App = () => {
 				<Button
 					size='sm'
 					variant='destructive'
+          className='h-6'
 					onClick={() => {
 						refetch()
 					}}
@@ -47,7 +48,6 @@ export const App = () => {
 			</div>
 			<DataTable
 				draggable={draggable}
-				devtools
 				onDataChange={(data, changes) => {
 					//@ts-ignore
           setData(data)

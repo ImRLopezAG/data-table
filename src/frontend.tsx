@@ -7,14 +7,12 @@
 
 import { createRoot } from "react-dom/client";
 import { StrictMode } from "react";
-import { App } from "./App";
-import './index.css'
+import { App } from "./app";
 
 import {
   QueryClient,
   QueryClientProvider
 } from '@tanstack/react-query'
-
 
 const queryClient = new QueryClient({
 })

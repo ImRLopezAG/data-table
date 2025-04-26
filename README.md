@@ -1,21 +1,24 @@
-# bun-react-tailwind-shadcn-template
-
-To install dependencies:
-
-```bash
-bun install
+```txt
+npm install
+npm run dev
 ```
 
-To start a development server:
-
-```bash
-bun dev
+```txt
+npm run deploy
 ```
 
-To run for production:
+[For generating/synchronizing types based on your Worker configuration run](https://developers.cloudflare.com/workers/wrangler/commands/#types):
 
-```bash
-bun start
+```txt
+npm run cf-typegen
 ```
 
-This project was created using `bun init` in bun v1.2.10. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+Pass the `CloudflareBindings` as generics when instantiation `Hono`:
+
+```ts
+// src/index.ts
+const app = new Hono<{ Bindings: CloudflareBindings }>()
+```
+Inject vite/react to serve the app with `vite` server as middleware and hono as the router / server :
+
+```ts

@@ -1,9 +1,8 @@
-'use client'
-import { DataTableColumnHeader } from '@components/table'
+import { Checkbox } from '@/components/ui/checkbox'
+import { DataTableColumnHeader } from './data-table-column-header'
 import type { ColumnDef, Row, Table } from '@tanstack/react-table'
-import { Checkbox } from '@ui/checkbox'
 import React, { useEffect, useState } from 'react'
-import { rangeFilter } from './helpers'
+import { rangeFilter } from '@/lib/data-table-helpers'
 interface Props<TData> {
 	columns: ColumnDef<TData>[]
 	rowAction?: (row: Row<TData>) => React.ReactNode

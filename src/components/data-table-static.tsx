@@ -5,9 +5,9 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@ui/table";
+} from "@/components/ui/table";
 
-import { cn } from "@lib/utils";
+import { cn } from "@/lib/utils";
 import type {
 	Cell,
 	ColumnDef,

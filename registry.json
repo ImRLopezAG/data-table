@@ -1,0 +1,152 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "data-table",
+  "homepage": "https://imrlopez.dev",
+  "items": [
+    {
+      "name": "data-table",
+      "type": "registry:block",
+      "title": "Static Data Table",
+      "author": "Angel Lopez",
+      "description": "Data table using shadcn/ui and tanstack/react-table",
+      "dependencies": ["@tanstack/react-table"],   
+      "registryDependencies": [
+        "button",
+        "checkbox",
+        "dropdown-menu",
+        "table",
+        "badge",
+        "command",
+        "separator",
+        "popover",
+        "https://components.imrlopez.dev/api/r/icon"
+      ],
+      "files": [
+        {
+          "path": "./src/components/data-table.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/hooks/use-data-table.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "./src/components/data-table-column-header.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/components/data-table-faceted-filter.tsx",  
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/components/data-table-pagination.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/components/data-table-toolbar.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/components/data-table-view-options.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/lib/data-table-helpers.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "./src/components/data-table-static.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/components/data-table-with-columns.tsx",
+          "type": "registry:block"
+        }
+      ]
+    },
+    {
+      "name": "data-table-dnd",
+      "type": "registry:block",
+      "title": "Dnd Data Table",
+      "author": "Angel Lopez",
+      "description": "Data table using shadcn/ui and tanstack/react-table and react dnd",
+      "dependencies": [
+        "@dnd-kit/core",
+        "@dnd-kit/modifiers",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities",
+        "@tanstack/react-table"
+      ],
+      "registryDependencies": [
+        "button",
+        "checkbox",
+        "dropdown-menu",
+        "table",
+        "badge",
+        "command",
+        "separator",
+        "popover",
+        "https://components.imrlopez.dev/api/r/icon"
+      ],
+      "files": [
+        {
+          "path": "./src/components/data-table.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/components/data-table-dnd.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/hooks/use-data-table.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "./src/components/data-table-column-header.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/components/data-table-faceted-filter.tsx",  
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/components/data-table-pagination.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/components/data-table-toolbar.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/components/data-table-view-options.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/lib/data-table-helpers.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "./src/components/data-table-static.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/components/data-table-with-columns.tsx",
+          "type": "registry:block"
+        }
+      ]
+    },
+    {
+      "name": "icon",
+      "type": "registry:ui",
+      "title": "Icons",
+      "description": "Icons wrapped in shadcn/ui blocks",
+      "dependencies": ["lucide-react"],
+      "files": [
+        {
+          "path": "./src/components/ui/icon.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    }
+  ]
+}
