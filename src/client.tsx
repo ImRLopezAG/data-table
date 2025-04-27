@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import { renderToString } from 'react-dom/server';
 const client = new Hono<{ Bindings: CloudflareBindings }>();
 
 client.get('/', ({ req, ...c }) => {
