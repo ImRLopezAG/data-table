@@ -74,8 +74,7 @@
         "@dnd-kit/core",
         "@dnd-kit/modifiers",
         "@dnd-kit/sortable",
-        "@dnd-kit/utilities",
-        "@tanstack/react-table"
+        "@dnd-kit/utilities"
       ],
       "registryDependencies": [
         "button",
@@ -86,51 +85,11 @@
         "command",
         "separator",
         "popover",
-        "https://components.imrlopez.dev/api/r/icon"
+        "https://components.imrlopez.dev/api/r/data-table"
       ],
       "files": [
         {
-          "path": "./src/components/data-table.tsx",
-          "type": "registry:block"
-        },
-        {
           "path": "./src/components/data-table-dnd.tsx",
-          "type": "registry:block"
-        },
-        {
-          "path": "./src/hooks/use-data-table.ts",
-          "type": "registry:hook"
-        },
-        {
-          "path": "./src/components/data-table-column-header.tsx",
-          "type": "registry:block"
-        },
-        {
-          "path": "./src/components/data-table-faceted-filter.tsx",  
-          "type": "registry:block"
-        },
-        {
-          "path": "./src/components/data-table-pagination.tsx",
-          "type": "registry:block"
-        },
-        {
-          "path": "./src/components/data-table-toolbar.tsx",
-          "type": "registry:block"
-        },
-        {
-          "path": "./src/components/data-table-view-options.tsx",
-          "type": "registry:block"
-        },
-        {
-          "path": "./src/lib/data-table-helpers.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "./src/components/data-table-static.tsx",
-          "type": "registry:block"
-        },
-        {
-          "path": "./src/components/data-table-with-columns.tsx",
           "type": "registry:block"
         }
       ]

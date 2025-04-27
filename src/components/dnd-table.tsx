@@ -215,3 +215,5 @@ function DragAlongCell<TData, TValue>({
 }
 
 export default DraggableTable
+
+export type DndTaleComponent =  typeof DraggableTable

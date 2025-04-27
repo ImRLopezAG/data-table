@@ -13,12 +13,12 @@ import type { DataTablePaginationProps } from "./data-table-pagination";
 import { StaticTable } from "./data-table-static";
 import type { DataTableToolbarProps } from "./data-table-toolbar";
 import { withColumns } from "./data-table-with-columns";
-
+import type { DndTaleComponent } from './dnd-table'
 import { Suspense, lazy } from "react";
 
 const LazyDataTablePagination = lazy(() => import("./data-table-pagination"));
 const LazyDataTableToolbar = lazy(() => import("./data-table-toolbar"));
-const LazyDraggableTable = lazy(() => import("./dnd-table"));
+const LazyDraggableTable = lazy(() => import("./dnd-table")) as DndTaleComponent;
 
 interface DataTableProps<TData> {
 	data: TData[];
@@ -38,7 +38,6 @@ interface DataTableProps<TData> {
 		tableRow?: (row: Row<TData>) => string;
 		tableCell?: (cell: Cell<TData, unknown>) => string;
 	};
-	devtools?: boolean;
 	onDataChange?: (data: TData[], changes: TData) => void;
 	children?: React.ReactNode;
 }
@@ -85,7 +84,7 @@ export function DataTable<TData>({
 					{props.draggable ? (
 						<Suspense fallback={<div>Loading...</div>}>
 							<LazyDraggableTable
-								table={table}
+								table={table as Table<TData>}
 								columnOrder={columnOrder}
 								handleChangeColumnOrder={handleChangeColumnOrder}
 								classNames={props.classNames}
@@ -138,3 +137,4 @@ DataTable.Pagination = function DT_Pagination<TData>(
 		</Suspense>
 	);
 };
+
