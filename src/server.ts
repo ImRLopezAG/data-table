@@ -65,15 +65,24 @@ api.get("/r/:name", async ({ req, env }) => {
 	const url = new URL(req.url);
 	const assetPath = import.meta.env.PROD ? `assets/${name}.json`:  `dist/client/assets/${name}.json`;
 	url.pathname = assetPath;
-	const assetRequest = new Request(url, req);
+	const assetRequest = new Request(url);
 	const asset = await env.ASSETS.fetch(assetRequest);
-	const assets = await env.ASSETS.fetch(assetRequest);
 
 	if (!asset.ok) {
 		return new Response("Component not found", { status: 404 });
 	}
-
-	return new Response(await assets.text(), {
+	const response = await asset.text();
+	try {
+		const json = JSON.parse(response);
+		return new Response(JSON.stringify(json), {
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+	} catch (error) {
+		console.error("Error parsing JSON:", error);
+	}
+	return new Response(response, {
 		headers: {
 			"Content-Type": "application/json",
 		},
