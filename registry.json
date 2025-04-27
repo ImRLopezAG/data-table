@@ -191,9 +191,9 @@
           "target": "./server.ts"
         },
         {
-          "path": "./src/components/registry/vite-hono/frontend.tsx",
+          "path": "./src/components/registry/vite-hono/main.tsx",
           "type": "registry:file",
-          "target": "frontend.tsx"
+          "target": "main.tsx"
         },
         {
           "path": "./src/components/registry/vite-hono/app.tsx",

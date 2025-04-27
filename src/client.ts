@@ -12,7 +12,7 @@ client.get('/', ({ req, ...c }) => {
     window.__vite_plugin_react_preamble_installed__ = true;
   `
 	const styles = import.meta.env.PROD ? '/assets/style.css' : '/src/style.css'
-	const script = import.meta.env.PROD ? '/index.js' : '/src/frontend.tsx'
+	const script = import.meta.env.PROD ? '/index.js' : '/src/main.tsx'
 
 	const html = `
 	<html lang="en">

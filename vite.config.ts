@@ -42,13 +42,13 @@ export default defineConfig(({ command, isSsrBuild }) => {
 			],
 			build: {
 				rollupOptions: {
-					input: ["./src/style.css", "./src/frontend.tsx"],
+					input: ["./src/style.css", "./src/main.tsx"],
 					output: {
 						assetFileNames: "assets/[name].[ext]",
 						chunkFileNames: "assets/[name].js",
 						entryFileNames: "assets/[name].js",
 						manualChunks: {
-							frontend: ["./src/frontend.tsx"],
+							main: ["./src/main.tsx"],
 						},
 					},
 				},

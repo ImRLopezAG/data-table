@@ -1,18 +1,21 @@
 import { DataTable } from '@/components/data-table-dnd'
-import { createGlobalState } from '@/hooks/global.state'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { useState } from 'react'
-import { dates, status, values } from './lib/utils'
+import { createGlobalState } from '@/hooks/global.state'
 import { cn } from '@/lib/utils'
 import type { Commit } from '@/services/commit'
+import { useState } from 'react'
+import { dates, status, values } from './lib/utils'
 
 function useCommits() {
-	return createGlobalState('commits', fetch('/api/commits?count=500').then(async (res) => {
-    const json = await res.json() as { data: Commit[] }
-    return json.data 
-  }))()
+	return createGlobalState(
+		'commits',
+		fetch('/api/commits?count=500').then(async (res) => {
+			const json = (await res.json()) as { data: Commit[] }
+			return json.data
+		}),
+	)()
 }
 
 export const App = () => {
@@ -22,7 +25,7 @@ export const App = () => {
 
 	return (
 		<section className='space-y-4 p-4'>
-			<div className='flex items-baseline gap-4'>
+			<div className='mb-12 flex items-baseline gap-4'>
 				<h1 className='font-bold text-2xl'>Commits</h1>
 				<div className='flex items-center gap-2'>
 					<Label htmlFor='draggable' className='text-sm'>
@@ -38,7 +41,7 @@ export const App = () => {
 				<Button
 					size='sm'
 					variant='destructive'
-          className='h-6'
+					className='h-6'
 					onClick={() => {
 						refetch()
 					}}
@@ -50,7 +53,7 @@ export const App = () => {
 				draggable={draggable}
 				onDataChange={(data, changes) => {
 					//@ts-ignore
-          setData(data)
+					setData(data)
 					console.log({ changes })
 				}}
 				data={data ?? []}
@@ -59,9 +62,9 @@ export const App = () => {
 						const status = row.original.status
 						return cn({
 							'rounded-3xl': true,
-							'bg-red-500/40': status === 'failed',
-							'bg-green-500/40': status === 'success',
-							'bg-yellow-500/40': status === 'pending',
+							'text-red-500/80': status === 'failed',
+							'text-green-500/80': status === 'success',
+							'text-yellow-500/80': status === 'pending',
 						})
 					},
 				}}
