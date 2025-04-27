@@ -5,31 +5,31 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table'
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils'
 import type {
 	Cell,
 	ColumnDef,
 	Header,
 	Row,
 	Table as TTable,
-} from "@tanstack/react-table";
-import { flexRender } from "@tanstack/react-table";
+} from '@tanstack/react-table'
+import { flexRender } from '@tanstack/react-table'
 
 interface StaticTableProps<TData> {
-	table: TTable<TData>;
-	columns: ColumnDef<TData>[];
-	emptyState: React.ReactNode;
+	table: TTable<TData>
+	columns: ColumnDef<TData>[]
+	emptyState: React.ReactNode
 	classNames?: {
-		container?: string;
-		table?: string;
-		tableHeader?: string;
-		tableHead?: (header: Header<TData, unknown>) => string;
-		tableBody?: string;
-		tableRow?: (row: Row<TData>) => string;
-		tableCell?: (cell: Cell<TData, unknown>) => string;
-	};
+		container?: string
+		table?: string
+		tableHeader?: string
+		tableHead?: (header: Header<TData, unknown>) => string
+		tableBody?: string
+		tableRow?: (row: Row<TData>) => string
+		tableCell?: (cell: Cell<TData, unknown>) => string
+	}
 }
 export function StaticTable<TData>({
 	table,
@@ -47,8 +47,8 @@ export function StaticTable<TData>({
 								<TableHead
 									key={header.id}
 									className={cn(
-										"[&:has([role=checkbox])]:pl-1",
-										classNames?.tableHead ? classNames.tableHead(header) : "",
+										'[&:has([role=checkbox])]:pl-1',
+										classNames?.tableHead ? classNames.tableHead(header) : '',
 									)}
 								>
 									{header.isPlaceholder
@@ -58,7 +58,7 @@ export function StaticTable<TData>({
 												header.getContext(),
 											)}
 								</TableHead>
-							);
+							)
 						})}
 					</TableRow>
 				))}
@@ -68,17 +68,17 @@ export function StaticTable<TData>({
 					table.getRowModel().rows.map((row) => (
 						<TableRow
 							key={row.id}
-							data-state={row.getIsSelected() && "selected"}
+							data-state={row.getIsSelected() && 'selected'}
 							className={cn(
-								classNames?.tableRow ? classNames.tableRow(row) : "",
+								classNames?.tableRow ? classNames.tableRow(row) : '',
 							)}
 						>
 							{row.getVisibleCells().map((cell) => (
 								<TableCell
 									key={cell.id}
 									className={cn(
-										"p-1",
-										classNames?.tableCell ? classNames.tableCell(cell) : "",
+										'p-1 align-baseline',
+										classNames?.tableCell ? classNames.tableCell(cell) : '',
 									)}
 								>
 									{flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -90,7 +90,7 @@ export function StaticTable<TData>({
 					<TableRow>
 						<TableCell
 							colSpan={columns.length}
-							className="p-1 h-24 text-center"
+							className='h-24 p-1 text-center'
 						>
 							{emptyState}
 						</TableCell>
@@ -98,5 +98,5 @@ export function StaticTable<TData>({
 				)}
 			</TableBody>
 		</Table>
-	);
+	)
 }

@@ -59,7 +59,7 @@ export function DataTable<TData>({
 		[props.columns],
 	);
 
-	const { table, columnOrder, handleChangeColumnOrder } = useDataTable({
+	const { table } = useDataTable({
 		columns: buildedColumns,
 		data: props.data,
 		onDataChange: props.onDataChange,

@@ -71,13 +71,20 @@ export function withColumns<TData>({
 function selectionColumn<TData>(): ColumnDef<TData> {
 	return {
 		id: 'select',
+		maxSize: 10,
 		header: ({ table }) => {
 			const checked = table.getIsAllPageRowsSelected()
 			const onCheckedChange = React.useCallback(
 				(value: boolean) => table.toggleAllPageRowsSelected(!!value),
 				[table],
 			)
-			return <Checkbox checked={checked} onCheckedChange={onCheckedChange} />
+			return (
+				<Checkbox 
+					aria-label='Select all'
+					checked={checked} 
+					onCheckedChange={onCheckedChange} 
+				/>
+			)
 		},
 		cell: ({ row }) => {
 			const checked = row.getIsSelected()
