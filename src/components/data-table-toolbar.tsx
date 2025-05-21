@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { Table } from "@tanstack/react-table";
 import { Fragment, type JSX } from "react";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { DataTableViewOptions } from "./data-table-view-options";
+import { X } from "lucide-react";
 
 export interface DataTableToolbarProps<TData> {
 	createComponent?: React.ReactNode;
@@ -77,7 +77,7 @@ export function DataTableToolbar<TData>({
 						className="h-8 px-2 lg:px-3"
 					>
 						Reset
-						<Icon name="X" className="ml-2 h-4 w-4" />
+						<X className="ml-2 h-4 w-4" />
 					</Button>
 				)}
 			</div>

@@ -18,8 +18,7 @@
         "badge",
         "command",
         "separator",
-        "popover",
-        "https://components.imrlopez.dev/api/r/icon"
+        "popover"
       ],
       "files": [
         {
@@ -77,14 +76,6 @@
         "@dnd-kit/utilities"
       ],
       "registryDependencies": [
-        "button",
-        "checkbox",
-        "dropdown-menu",
-        "table",
-        "badge",
-        "command",
-        "separator",
-        "popover",
         "https://components.imrlopez.dev/api/r/data-table"
       ],
       "files": [

@@ -20,10 +20,9 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { flexRender } from '@tanstack/react-table'
-
+import { GripHorizontal } from 'lucide-react'
 import type { Cell, Header, Row, Table as TTable } from '@tanstack/react-table'
 
-import { Icon } from '@/components/ui/icon'
 import {
 	Table,
 	TableBody,
@@ -177,7 +176,7 @@ function DraggableTableHeader<TData, TValue>({
 					{...listeners}
 					className='dnd-handle pointer-events-auto cursor-grab active:cursor-grabbing'
 				>
-					<Icon name='GripHorizontal' className='size-4' />
+					<GripHorizontal className='size-4' />
 					<span className='sr-only'>Drag to reorder</span>
 				</div>
 			</div>

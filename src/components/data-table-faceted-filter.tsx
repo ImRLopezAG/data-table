@@ -1,9 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import type { Column, Table } from "@tanstack/react-table";
-
+import { Plus, Check } from "lucide-react";
 import * as CMD from "@/components/ui/command";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -35,7 +34,7 @@ export function DataTableFacetedFilter<TData>({
 		<Popover>
 			<PopoverTrigger asChild>
 				<Button variant="outline" size="sm" className="h-9 border-dashed">
-					<Icon name="Plus" className="mr-2 h-4 w-4" />
+					<Plus className="mr-2 h-4 w-4" />
 					{title}
 					{selectedValues?.size > 0 && (
 						<>
@@ -106,7 +105,7 @@ export function DataTableFacetedFilter<TData>({
 													: "opacity-50 [&_svg]:invisible",
 											)}
 										>
-											<Icon name="Check" className={cn("h-4 w-4")} />
+											<Check className={cn("h-4 w-4")} />
 										</div>
 										{option.icon && (
 											<option.icon className="mr-2 h-4 w-4 text-muted-foreground" />
