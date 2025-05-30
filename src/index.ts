@@ -9,5 +9,5 @@ app.use("*", logger());
 app.route("/api", api);
 app.route("/", client);
 
-export { CommitServer } 
+export { CommitServer };
 export default app;
