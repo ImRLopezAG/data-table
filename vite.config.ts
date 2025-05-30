@@ -6,6 +6,18 @@ import { defineConfig } from "vite";
 import ssrHotReload from "vite-plugin-ssr-hot-reload";
 import viteTsConfigPaths from "vite-tsconfig-paths";
 export default defineConfig(({ command, isSsrBuild }) => {
+	const include = [
+		"react",
+		"react-dom",
+		"@tanstack/react-query",
+		"@tanstack/react-table",
+		"@dnd/kit",
+		"@dnd-kit/sortable",
+		"@dnd-kit/core",
+		"@dnd-kit/accessibility",
+		"@dnd-kit/utilities",
+		"@dnd-kit/modifiers",
+	]
 	if (command === "serve") {
 		return {
 			plugins: [
@@ -16,18 +28,7 @@ export default defineConfig(({ command, isSsrBuild }) => {
 				tailwindcss(),
 			],
 			optimizeDeps: {
-				include: [
-					"react",
-					"react-dom",
-					"@tanstack/react-query",
-					"@tanstack/react-table",
-					"@dnd/kit",
-					"@dnd-kit/sortable",
-					"@dnd-kit/core",
-					"@dnd-kit/accessibility",
-					"@dnd-kit/utilities",
-					"@dnd-kit/modifiers",
-				],
+				include,
 			}
 		};
 	}
@@ -43,6 +44,7 @@ export default defineConfig(({ command, isSsrBuild }) => {
 			build: {
 				rollupOptions: {
 					input: ["./src/style.css", "./src/main.tsx"],
+					external: ["cloudflare:workers"],
 					output: {
 						assetFileNames: "assets/[name].[ext]",
 						chunkFileNames: "assets/[name].js",
@@ -56,8 +58,16 @@ export default defineConfig(({ command, isSsrBuild }) => {
 		};
 	}
 	return {
-		ssr:{
+		ssr: {
 			noExternal: true,
+		},
+		build: {
+			rollupOptions: {
+				external: ["cloudflare:workers"],
+			},
+		},
+		optimizeDeps: {
+			include,
 		},
 		plugins: [build({ outputDir: "dist-server" }), viteTsConfigPaths()],
 	};

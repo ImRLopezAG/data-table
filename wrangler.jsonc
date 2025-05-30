@@ -4,18 +4,33 @@
   "main": "src/index.ts",
   "compatibility_date": "2025-04-25",
   "compatibility_flags": [
-    "nodejs_compat_v2",
+    "nodejs_compat",
   ],
   "observability": {
-    "enabled": true,
-    "head_sampling_rate": 1
+    "enabled": true
   },
   "assets": {
     "directory": "./dist/client/",
     "binding": "ASSETS"
   },
-  "route" : {
+  "route": {
     "pattern": "components.imrlopez.dev/*",
     "zone_name": "imrlopez.dev"
-  }
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "class_name": "CommitServer",
+        "name": "MCP_OBJECT"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "new_sqlite_classes": [
+        "CommitServer"
+      ],
+      "tag": "v1"
+    },
+  ],
 }

@@ -1,14 +1,17 @@
 import { faker } from '@faker-js/faker'
+import { z } from 'zod'
 
-export interface Commit {
-  hash: string
-  message: string
-  date: string
-  status: 'success' | 'failed' | 'pending'
-  author: string
-  company: string
-  value: number
-}
+export const commitSchema = z.object({
+  hash: z.string(),
+  message: z.string(),
+  date: z.string(),
+  status: z.enum(['success', 'failed', 'pending']),
+  author: z.string(),
+  company: z.string(),
+  value: z.number()
+})
+
+export type Commit = z.infer<typeof commitSchema>
 
 const fakeCommit = (): Commit => ({
   hash: faker.git.commitSha(),

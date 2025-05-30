@@ -1,5 +1,7 @@
 import { fakeCommits } from "@/services/commit";
 import { Hono } from "hono";
+import { CommitServer } from './mcp';
+export { CommitServer } 
 const api = new Hono<{ Bindings: CloudflareBindings }>();
 const commits = fakeCommits(500);
 
@@ -62,9 +64,9 @@ api.get("/r/:name", async ({ req, env }) => {
 	if (!name) {
 		return new Response("Name is required", { status: 400 });
 	}
-	
+
 	const url = new URL(req.url);
-	const assetPath = import.meta.env.PROD ? `assets/${name}.json`:  `dist/client/assets/${name}.json`;
+	const assetPath = import.meta.env.PROD ? `assets/${name}.json` : `dist/client/assets/${name}.json`;
 	url.pathname = assetPath;
 	const assetRequest = new Request(url);
 	const asset = await env.ASSETS.fetch(assetRequest);
@@ -73,6 +75,7 @@ api.get("/r/:name", async ({ req, env }) => {
 		return new Response("Component not found", { status: 404 });
 	}
 	const response = await asset.text();
+	console.log("Response from asset:", response);
 	try {
 		const json = JSON.parse(response);
 		return new Response(JSON.stringify(json), {
@@ -89,4 +92,12 @@ api.get("/r/:name", async ({ req, env }) => {
 		},
 	});
 });
+
+
+api.mount("/mcp", CommitServer.serve('/api/mcp').fetch, {
+	replaceRequest(originalRequest) {
+		return new Request(originalRequest)
+	},
+});
+
 export default api;

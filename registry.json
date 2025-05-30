@@ -18,12 +18,14 @@
         "badge",
         "command",
         "separator",
-        "popover"
+        "popover",
+        "select",
+        "input"
       ],
       "files": [
         {
           "path": "./src/components/data-table.tsx",
-          "type": "registry:block"
+          "type": "registry:component"
         },
         {
           "path": "./src/hooks/use-data-table.ts",
@@ -31,23 +33,23 @@
         },
         {
           "path": "./src/components/data-table-column-header.tsx",
-          "type": "registry:block"
+          "type": "registry:component"
         },
         {
           "path": "./src/components/data-table-faceted-filter.tsx",  
-          "type": "registry:block"
+          "type": "registry:component"
         },
         {
           "path": "./src/components/data-table-pagination.tsx",
-          "type": "registry:block"
+          "type": "registry:component"
         },
         {
           "path": "./src/components/data-table-toolbar.tsx",
-          "type": "registry:block"
+          "type": "registry:component"
         },
         {
           "path": "./src/components/data-table-view-options.tsx",
-          "type": "registry:block"
+          "type": "registry:component"
         },
         {
           "path": "./src/lib/data-table-helpers.ts",
@@ -55,17 +57,17 @@
         },
         {
           "path": "./src/components/data-table-static.tsx",
-          "type": "registry:block"
+          "type": "registry:component"
         },
         {
           "path": "./src/components/data-table-with-columns.tsx",
-          "type": "registry:block"
+          "type": "registry:component"
         }
       ]
     },
     {
       "name": "data-table-dnd",
-      "type": "registry:block",
+      "type": "registry:component",
       "title": "Dnd Data Table",
       "author": "Angel Lopez",
       "description": "Data table using shadcn/ui and tanstack/react-table and react dnd",
@@ -81,20 +83,7 @@
       "files": [
         {
           "path": "./src/components/data-table-dnd.tsx",
-          "type": "registry:block"
-        }
-      ]
-    },
-    {
-      "name": "icon",
-      "type": "registry:ui",
-      "title": "Icons",
-      "description": "Icons wrapped in shadcn/ui blocks",
-      "dependencies": ["lucide-react"],
-      "files": [
-        {
-          "path": "./src/components/ui/icon.tsx",
-          "type": "registry:ui"
+          "type": "registry:component"
         }
       ]
     },
@@ -111,8 +100,7 @@
         "label",
         "select",
         "textarea",
-        "form",
-        "https://components.imrlopez.dev/api/r/icon"
+        "form"
       ],
       "files": [
         {
@@ -149,6 +137,19 @@
           "path": "./src/components/registry/vite-hono/app.tsx",
           "type": "registry:file",
           "target": "app.tsx"
+        }
+      ]
+    },
+    {
+      "name": "fetcher",
+      "type": "registry:lib",
+      "title": "Fetcher",
+      "author": "Angel Lopez",
+      "description": "A simple fetcher interceptor  build on top of fetch API",
+      "files": [
+        {
+          "path": "./src/lib/create-fetcher.ts",
+          "type": "registry:lib"
         }
       ]
     }
