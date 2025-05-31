@@ -1,7 +1,7 @@
 import { fakeCommits } from "@/services/commit";
 import { Hono } from "hono";
-import { CommitServer } from './mcp';
-export { CommitServer } 
+// import { McpIntegration } from './mcp';
+// export { McpIntegration };
 const api = new Hono<{ Bindings: CloudflareBindings }>();
 const commits = fakeCommits(500);
 
@@ -94,10 +94,10 @@ api.get("/r/:name", async ({ req, env }) => {
 });
 
 
-api.mount("/mcp", CommitServer.serve('/api/mcp').fetch, {
-	replaceRequest(originalRequest) {
-		return new Request(originalRequest)
-	},
-});
+// api.mount("/mcp", McpIntegration.serve('/api/mcp').fetch, {
+// 	replaceRequest(originalRequest) {
+// 		return new Request(originalRequest)
+// 	},
+// });
 
 export default api;
