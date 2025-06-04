@@ -6,9 +6,7 @@ export function rangeFilter(value: unknown, filterValue: Array<string>) {
 			return dateFilterEvaluation(range, parsedValue)
 		}
 
-		const [minPart, maxPart] = range
-									.split(/(?:-|to|,)/)
-									.map((p) => p.trim())
+		const [minPart, maxPart] = range.split(/(?:-|to|,)/).map((p) => p.trim())
 
 		if (typeof parsedValue === 'number') {
 			const min = Number(minPart)
@@ -27,8 +25,10 @@ export function rangeFilter(value: unknown, filterValue: Array<string>) {
 			if (!Number.isNaN(minNum) && !Number.isNaN(maxNum)) {
 				return value.length >= minNum && value.length <= maxNum
 			}
+
 			return (
-				value.localeCompare(minPart) >= 0 && value.localeCompare(maxPart) <= 0
+				value.localeCompare(minPart ?? '') >= 0 &&
+				value.localeCompare(maxPart ?? '') <= 0
 			)
 		}
 
@@ -42,6 +42,9 @@ export function dateFilterEvaluation(cleaned: string, value: Date) {
 	)
 	if (dateRangeMatch && dateRangeMatch.length === 3) {
 		const [_, rawMin, rawMax] = dateRangeMatch
+		if (!rawMin || !rawMax) {
+			return false
+		}
 		const minDate = new Date(rawMin.trim())
 		const maxDate = new Date(rawMax.trim())
 		const evaluation =
