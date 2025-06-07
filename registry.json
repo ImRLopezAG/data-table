@@ -22,10 +22,15 @@
         "select",
         "input"
       ],
+      "categories": [
+        "data-table",
+        "table",
+        "ui"
+      ],
       "files": [
         {
           "path": "./src/components/data-table.tsx",
-          "type": "registry:component"
+          "type": "registry:block"
         },
         {
           "path": "./src/hooks/use-data-table.ts",
@@ -33,35 +38,31 @@
         },
         {
           "path": "./src/components/data-table-column-header.tsx",
-          "type": "registry:component"
+          "type": "registry:block"
         },
         {
           "path": "./src/components/data-table-faceted-filter.tsx",  
-          "type": "registry:component"
+          "type": "registry:block"
         },
         {
           "path": "./src/components/data-table-pagination.tsx",
-          "type": "registry:component"
+          "type": "registry:block"
         },
         {
           "path": "./src/components/data-table-toolbar.tsx",
-          "type": "registry:component"
+          "type": "registry:block"
         },
         {
           "path": "./src/components/data-table-view-options.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "./src/lib/data-table-helpers.ts",
-          "type": "registry:lib"
+          "type": "registry:block"
         },
         {
           "path": "./src/components/data-table-static.tsx",
-          "type": "registry:component"
+          "type": "registry:block"
         },
         {
           "path": "./src/components/data-table-with-columns.tsx",
-          "type": "registry:component"
+          "type": "registry:block"
         }
       ]
     },
@@ -83,7 +84,8 @@
       "files": [
         {
           "path": "./src/components/data-table-dnd.tsx",
-          "type": "registry:component"
+          "type": "registry:component",
+          "target": "./data-table/data-table-dnd.tsx"
         }
       ]
     },
@@ -106,7 +108,7 @@
         {
           "path": "./src/components/registry/vite-hono/config.ts",
           "type": "registry:file",
-          "target": "./vite.config.ts"
+          "target": "~/vite.config.ts"
         },
         {
           "path": "./src/components/registry/vite-hono/index.ts",
