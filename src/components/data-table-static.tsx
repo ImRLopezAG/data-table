@@ -7,6 +7,7 @@ import {
 	TableRow,
 } from '@/components/ui/table'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import type {
 	Cell,
@@ -21,6 +22,7 @@ interface StaticTableProps<TData> {
 	table: TTable<TData>
 	columns: ColumnDef<TData>[]
 	emptyState: React.ReactNode
+	loading?: boolean
 	classNames?: {
 		container?: string
 		table?: string
@@ -35,6 +37,7 @@ export function StaticTable<TData>({
 	table,
 	columns,
 	emptyState,
+	loading = false,
 	classNames,
 }: StaticTableProps<TData>) {
 	return (
@@ -64,7 +67,18 @@ export function StaticTable<TData>({
 				))}
 			</TableHeader>
 			<TableBody className={classNames?.tableBody}>
-				{table.getRowModel().rows?.length ? (
+				{loading ? (
+					// Show skeleton rows while loading
+					Array.from({ length: 5 }).map((_, index) => (
+						<TableRow key={`skeleton-${index}`}>
+							{table.getHeaderGroups()[0]?.headers.map((header) => (
+								<TableCell key={header.id} className='p-1 align-baseline'>
+									<Skeleton className='h-4 w-full' />
+								</TableCell>
+							))}
+						</TableRow>
+					))
+				) : table.getRowModel().rows?.length ? (
 					table.getRowModel().rows.map((row) => (
 						<TableRow
 							key={row.id}

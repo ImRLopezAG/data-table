@@ -22,6 +22,7 @@ interface DataTableProps<TData> {
 	}
 	emptyState?: React.ReactNode
 	draggable?: boolean
+	loading?: boolean
 	pagination?: {
 		pageSize?: number
 	}
@@ -92,6 +93,7 @@ export function DataTable<TData>({
 						classNames={props.classNames}
 						columns={buildedColumns}
 						emptyState={props.emptyState}
+						loading={props.loading}
 					/>
 				</div>
 

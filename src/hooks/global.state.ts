@@ -6,7 +6,7 @@ export function createGlobalState<T>(
 	return () => {
 		const queryClient = useQueryClient()
 
-		const { data } = useQuery({
+		const { data, isLoading, error } = useQuery({
 			queryKey: [queryKey],
 			queryFn: () => Promise.resolve(initialData),
 			refetchInterval: false,
@@ -29,6 +29,6 @@ export function createGlobalState<T>(
 			})
 		}
 
-		return { data, setData, refetch }
+		return { data, setData, refetch , isLoading, error }
 	}
 }

@@ -19,10 +19,11 @@ import {
 	useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import type { Cell, Header, Row, Table as TTable } from '@tanstack/react-table'
 import { flexRender } from '@tanstack/react-table'
 import { GripHorizontal } from 'lucide-react'
-import type { Cell, Header, Row, Table as TTable } from '@tanstack/react-table'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import {
 	Table,
 	TableBody,
@@ -37,6 +38,7 @@ export interface DraggableTableProps<TData> {
 	table: TTable<TData>
 	columnOrder: string[]
 	handleChangeColumnOrder: (columnOrder: string[]) => void
+	loading?: boolean
 	classNames?: {
 		container?: string
 		table?: string
@@ -55,6 +57,7 @@ export function DraggableTable<TData>({
 	columnOrder,
 	classNames,
 	handleChangeColumnOrder,
+	loading = false,
 }: DraggableTableProps<TData>) {
 	const sensors = useSensors(
 		useSensor(MouseSensor, {
@@ -112,25 +115,36 @@ export function DraggableTable<TData>({
 					))}
 				</TableHeader>
 				<TableBody className={classNames?.tableBody}>
-					{table.getRowModel().rows.map((row) => (
-						<TableRow
-							key={row.id}
-							data-state={row.getIsSelected() && 'selected'}
-							className={cn(
-								classNames?.tableRow ? classNames.tableRow(row) : '',
-							)}
-						>
-							{row.getVisibleCells().map((cell) => (
-								<DragAlongCell
-									key={cell.id}
-									cell={cell}
+					{loading
+						? // Show skeleton rows while loading
+							Array.from({ length: 5 }).map((_, index) => (
+								<TableRow key={`skeleton-${index}`}>
+									{table.getHeaderGroups()[0]?.headers.map((header) => (
+										<TableCell key={header.id} className='p-1 align-baseline'>
+											<Skeleton className='h-4 w-full' />
+										</TableCell>
+									))}
+								</TableRow>
+							))
+						: table.getRowModel().rows.map((row) => (
+								<TableRow
+									key={row.id}
+									data-state={row.getIsSelected() && 'selected'}
 									className={cn(
-										classNames?.tableCell ? classNames.tableCell(cell) : '',
+										classNames?.tableRow ? classNames.tableRow(row) : '',
 									)}
-								/>
+								>
+									{row.getVisibleCells().map((cell) => (
+										<DragAlongCell
+											key={cell.id}
+											cell={cell}
+											className={cn(
+												classNames?.tableCell ? classNames.tableCell(cell) : '',
+											)}
+										/>
+									))}
+								</TableRow>
 							))}
-						</TableRow>
-					))}
 				</TableBody>
 			</Table>
 		</DndContext>
@@ -215,4 +229,4 @@ function DragAlongCell<TData, TValue>({
 
 export default DraggableTable
 
-export type DndTaleComponent =  typeof DraggableTable
+export type DndTaleComponent = typeof DraggableTable

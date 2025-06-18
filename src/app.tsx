@@ -39,8 +39,14 @@ const status = ['success', 'failed', 'pending'].map((value) => ({
 
 export const App = () => {
 	const [draggable, setDraggable] = useState(false)
+	const [testLoading, setTestLoading] = useState(false)
 	const toggleDraggable = () => setDraggable((prev) => !prev)
-	const { data, refetch, setData } = useCommits()
+	const { data, refetch, setData, isLoading } = useCommits()
+
+	const triggerTestLoading = () => {
+		setTestLoading(true)
+		setTimeout(() => setTestLoading(false), 3000)
+	}
 
 	return (
 		<section className='space-y-4 p-4'>
@@ -67,9 +73,18 @@ export const App = () => {
 				>
 					Refresh Data
 				</Button>
+				<Button
+					size='sm'
+					variant='outline'
+					className='h-6'
+					onClick={triggerTestLoading}
+				>
+					Test Loading
+				</Button>
 			</div>
 			<DataTable
 				draggable={draggable}
+				loading={isLoading}
 				onDataChange={(data, changes) => {
 					//@ts-ignore
 					setData(data)
