@@ -5,8 +5,16 @@ import { Label } from '@/components/ui/label'
 import { createGlobalState } from '@/hooks/global.state'
 import { cn } from '@/lib/utils'
 import type { Commit } from '@/services/commit'
+import {
+	CheckCircle,
+	Circle,
+	CircleOff,
+	HelpCircle,
+	Timer,
+	XCircle,
+} from 'lucide-react'
 import { useState } from 'react'
-import { dates, status, values } from './lib/utils'
+import { dates, values } from './lib/utils'
 
 function useCommits() {
 	return createGlobalState(
@@ -17,6 +25,17 @@ function useCommits() {
 		}),
 	)()
 }
+
+const status = ['success', 'failed', 'pending'].map((value) => ({
+	value,
+	icon:
+		value === 'success'
+			? CheckCircle
+			: value === 'failed'
+				? XCircle
+				: HelpCircle,
+	label: value.charAt(0).toUpperCase() + value.slice(1),
+}))
 
 export const App = () => {
 	const [draggable, setDraggable] = useState(false)
@@ -57,6 +76,10 @@ export const App = () => {
 					console.log({ changes })
 				}}
 				data={data ?? []}
+				pagination={{
+					pageSize: 20,
+
+				}}
 				classNames={{
 					tableRow(row) {
 						const status = row.original.status

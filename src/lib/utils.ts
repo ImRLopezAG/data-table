@@ -37,10 +37,6 @@ export const values = [
 		label: value,
 	}))
 
-export const status = ['success', 'failed', 'pending'].map((value) => ({
-	value,
-	label: value.charAt(0).toUpperCase() + value.slice(1),
-}))
 
 function getDate(year: number) {
 	const date = new Date(year, 0, 1)
