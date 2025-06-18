@@ -29,11 +29,16 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onDataChange?: (data: TData[], changes: TData) => void;
+  pagination?: {
+    enabled: boolean;
+    pageSize?: number;
+  };
 }
 export function useDataTable<TData, TValue>({
   columns,
   data,
   onDataChange,
+  pagination,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -43,10 +48,19 @@ export function useDataTable<TData, TValue>({
     columns.map((col) => col.id ?? crypto.randomUUID()),
   );
 
+  const isPaginationEnabled = pagination?.enabled ?? false;
+
   const table = useReactTable({
     data,
     columns: columns,
     enableRowSelection: true,
+    ...(isPaginationEnabled && {
+      initialState: {
+        pagination: {
+          pageSize: pagination?.pageSize ?? 10,
+        },
+      },
+    }),
     state: {
       sorting,
       columnVisibility,
@@ -60,9 +74,8 @@ export function useDataTable<TData, TValue>({
           const newData = [...data].map((row, idx) =>
             idx === rowIndex ? { ...row, [columnId]: value } : row
           );
-          const changes = {
-            ...newData[rowIndex],
-          };
+          const changes = newData[rowIndex];
+          if (!changes) return;
           onDataChange(newData, changes);
         }
       },
@@ -74,7 +87,7 @@ export function useDataTable<TData, TValue>({
     onColumnOrderChange: setColumnOrder,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    ...(isPaginationEnabled && { getPaginationRowModel: getPaginationRowModel() }),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
