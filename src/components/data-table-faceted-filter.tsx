@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import * as CMD from '@/components/ui/command'
-import { rangeFilter } from '@/lib/data-table-helpers'
+import { rangeFilter } from './data-table-with-columns'
 import { cn } from '@/lib/utils'
 import type { Column, Table } from '@tanstack/react-table'
 import { Check, Plus } from 'lucide-react'
@@ -11,6 +11,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover'
+
 import { Separator } from '@/components/ui/separator'
 import type { JSX } from 'react'
 

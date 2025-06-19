@@ -20,7 +20,8 @@
         "separator",
         "popover",
         "select",
-        "input"
+        "input",
+        "skeleton"
       ],
       "categories": [
         "data-table",

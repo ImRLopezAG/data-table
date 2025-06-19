@@ -84,7 +84,7 @@ export const App = () => {
 			</div>
 			<DataTable
 				draggable={draggable}
-				loading={isLoading}
+				loading={isLoading || testLoading}
 				onDataChange={(data, changes) => {
 					//@ts-ignore
 					setData(data)
@@ -93,7 +93,6 @@ export const App = () => {
 				data={data ?? []}
 				pagination={{
 					pageSize: 20,
-
 				}}
 				classNames={{
 					tableRow(row) {
