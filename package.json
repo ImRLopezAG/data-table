@@ -19,6 +19,7 @@
     "@tailwindcss/vite": "^4.1.4",
     "@tanstack/react-query": "^5.74.4",
     "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.13.10",
     "@vitejs/plugin-react": "^4.4.1",
     "agents": "^0.0.94",
     "class-variance-authority": "^0.7.1",

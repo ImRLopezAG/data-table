@@ -9,7 +9,7 @@
       "title": "Static Data Table",
       "author": "Angel Lopez",
       "description": "Data table using shadcn/ui and tanstack/react-table",
-      "dependencies": ["@tanstack/react-table"],   
+      "dependencies": ["@tanstack/react-table", "@tanstack/react-virtual"],   
       "registryDependencies": [
         "button",
         "checkbox",

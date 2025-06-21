@@ -5,21 +5,15 @@ import { Label } from '@/components/ui/label'
 import { createGlobalState } from '@/hooks/global.state'
 import { cn } from '@/lib/utils'
 import type { Commit } from '@/services/commit'
-import {
-	CheckCircle,
-	Circle,
-	CircleOff,
-	HelpCircle,
-	Timer,
-	XCircle,
-} from 'lucide-react'
+import { useMutation } from '@tanstack/react-query'
+import { CheckCircle, HelpCircle, XCircle } from 'lucide-react'
 import { useState } from 'react'
 import { dates, values } from './lib/utils'
 
 function useCommits() {
 	return createGlobalState(
 		'commits',
-		fetch('/api/commits?count=500').then(async (res) => {
+		fetch('/api/commits?count=2000').then(async (res) => {
 			const json = (await res.json()) as { data: Commit[] }
 			return json.data
 		}),
@@ -41,12 +35,52 @@ export const App = () => {
 	const [draggable, setDraggable] = useState(false)
 	const [testLoading, setTestLoading] = useState(false)
 	const toggleDraggable = () => setDraggable((prev) => !prev)
-	const { data, refetch, setData, isLoading } = useCommits()
-
+	const { data, refetch, isLoading, queryClient } = useCommits()
 	const triggerTestLoading = () => {
 		setTestLoading(true)
 		setTimeout(() => setTestLoading(false), 3000)
 	}
+
+	const updateCommit = useMutation({
+		mutationFn: async (commit: Partial<Commit>) => {
+			const response = await fetch(`/api/commits/${commit.hash}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(commit),
+			})
+			if (!response.ok) {
+				throw new Error('Failed to update commit')
+			}
+			const responseData = await response.json()
+			return responseData as Commit
+		},
+		// Optimistic update: immediately update the UI
+		async onMutate(newCommit) {
+			// Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+			await queryClient.cancelQueries({ queryKey: ['commits'] })
+
+			// Snapshot the previous value for rollback
+			const previousData = queryClient.getQueryData<Commit[]>(['commits'])
+
+			// Optimistically update to the new value immediately
+			queryClient.setQueryData(['commits'], (oldData: Commit[] | undefined) => {
+				if (!oldData) return []
+				return oldData.map((commit) =>
+					commit.hash === newCommit.hash ? { ...commit, ...newCommit } : commit,
+				)
+			})
+
+			return { previousData }
+		},
+		// If the mutation fails, roll back to the previous state
+		onError: (_err, _newCommit, context) => {
+			if (context?.previousData) {
+				queryClient.setQueryData(['commits'], context.previousData)
+			}
+		}
+	})
 
 	return (
 		<section className='space-y-4 p-4'>
@@ -85,10 +119,8 @@ export const App = () => {
 			<DataTable
 				draggable={draggable}
 				loading={isLoading || testLoading}
-				onDataChange={(data, changes) => {
-					//@ts-ignore
-					setData(data)
-					console.log({ changes })
+				onDataChange={(_data, changes) => {
+					updateCommit.mutate(changes)
 				}}
 				data={data ?? []}
 				pagination={{
