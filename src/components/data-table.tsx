@@ -65,7 +65,7 @@ export function DataTable<TData>({
 
 	const hasPagination = paginationChildren.length > 0
 
-	const { table } = useDataTable({
+	const { table, virtualizer, parentRef } = useDataTable({
 		columns: buildedColumns,
 		data: props.data,
 		onDataChange: props.onDataChange,
@@ -87,9 +87,10 @@ export function DataTable<TData>({
 			<div className='space-y-4'>
 				{toolbarChildren}
 
-				<div className={cn(props.classNames?.container, 'rounded-md border')}>
+				<div className={cn(props.classNames?.container, 'rounded-md border')} ref={parentRef}>
 					<StaticTable
 						table={table}
+						virtualizer={virtualizer}
 						classNames={props.classNames}
 						columns={buildedColumns}
 						emptyState={props.emptyState}

@@ -68,7 +68,13 @@ export function DataTable<TData>({
 
 	const hasPagination = paginationChildren.length > 0
 
-	const { table, columnOrder, handleChangeColumnOrder } = useDataTable({
+	const {
+		table,
+		columnOrder,
+		handleChangeColumnOrder,
+		virtualizer,
+		parentRef,
+	} = useDataTable({
 		columns: buildedColumns,
 		data: props.data,
 		onDataChange: props.onDataChange,
@@ -85,7 +91,7 @@ export function DataTable<TData>({
 			<div className='space-y-4'>
 				{toolbarChildren}
 
-				<div className={cn(props.classNames?.container, 'rounded-md border')}>
+				<div className={cn(props.classNames?.container, 'rounded-md border')} ref={parentRef}>
 					{props.draggable ? (
 						<Suspense fallback={<div>Loading...</div>}>
 							<LazyDraggableTable
@@ -99,6 +105,7 @@ export function DataTable<TData>({
 					) : (
 						<StaticTable
 							table={table}
+							virtualizer={virtualizer}
 							classNames={props.classNames}
 							columns={buildedColumns}
 							emptyState={props.emptyState}

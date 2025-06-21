@@ -1,5 +1,4 @@
 import {
-	Table,
 	TableBody,
 	TableCell,
 	TableHead,
@@ -17,12 +16,15 @@ import type {
 	Table as TTable,
 } from '@tanstack/react-table'
 import { flexRender } from '@tanstack/react-table'
+import type { Virtualizer } from '@tanstack/react-virtual'
 
 interface StaticTableProps<TData> {
 	table: TTable<TData>
 	columns: ColumnDef<TData>[]
 	emptyState: React.ReactNode
 	loading?: boolean
+	virtualizer: Virtualizer<HTMLDivElement, Element>
+
 	classNames?: {
 		container?: string
 		table?: string
@@ -39,10 +41,15 @@ export function StaticTable<TData>({
 	emptyState,
 	loading = false,
 	classNames,
+	virtualizer,
 }: StaticTableProps<TData>) {
+	const { rows } = table.getRowModel()
+
 	return (
-		<Table className={classNames?.table}>
-			<TableHeader className={classNames?.tableHeader}>
+		<Table
+			className={cn('w-full caption-bottom text-sm', classNames?.table)}
+		>
+			<TableHeader className={cn('sticky top-0 z-10', classNames?.tableHeader)}>
 				{table.getHeaderGroups().map((headerGroup) => (
 					<TableRow key={headerGroup.id}>
 						{headerGroup.headers.map((header) => {
@@ -66,6 +73,7 @@ export function StaticTable<TData>({
 					</TableRow>
 				))}
 			</TableHeader>
+			
 			<TableBody className={classNames?.tableBody}>
 				{loading ? (
 					// Show skeleton rows while loading
@@ -78,39 +86,66 @@ export function StaticTable<TData>({
 							))}
 						</TableRow>
 					))
-				) : table.getRowModel().rows?.length ? (
-					table.getRowModel().rows.map((row) => (
-						<TableRow
-							key={row.id}
-							data-state={row.getIsSelected() && 'selected'}
-							className={cn(
-								classNames?.tableRow ? classNames.tableRow(row) : '',
-							)}
-						>
-							{row.getVisibleCells().map((cell) => (
-								<TableCell
-									key={cell.id}
-									className={cn(
-										'p-1 align-baseline',
-										classNames?.tableCell ? classNames.tableCell(cell) : '',
-									)}
-								>
-									{flexRender(cell.column.columnDef.cell, cell.getContext())}
-								</TableCell>
-							))}
-						</TableRow>
-					))
+				) : virtualizer.getVirtualItems().length ? (
+					virtualizer.getVirtualItems().map((virtualRow, index) => {
+						const row = rows[virtualRow.index]
+						return (
+							<TableRow
+								key={row.id}
+								data-state={row.getIsSelected() && 'selected'}
+								className={cn(
+									classNames?.tableRow ? classNames.tableRow(row) : '',
+								)}
+								style={{
+									height: `${virtualRow.size}px`,
+									transform: `translateY(${
+										virtualRow.start - index * virtualRow.size
+									}px)`,
+								}}
+							>
+								{row.getVisibleCells().map((cell) => (
+									<TableCell
+										key={cell.id}
+										className={cn(
+											'p-1 align-baseline',
+											classNames?.tableCell ? classNames.tableCell(cell) : '',
+										)}
+									>
+										{flexRender(cell.column.columnDef.cell, cell.getContext())}
+									</TableCell>
+								))}
+							</TableRow>
+						)
+					})
 				) : (
 					<TableRow>
 						<TableCell
 							colSpan={columns.length}
 							className='h-24 p-1 text-center'
 						>
-							{emptyState}
+							{emptyState ?? 'No data available'}
 						</TableCell>
 					</TableRow>
 				)}
 			</TableBody>
 		</Table>
+	)
+}
+
+function Table({
+	className,
+	...props
+}: React.ComponentProps<'table'>) {
+	return (
+		<div
+			data-slot='table-container'
+			className='relative w-full overflow-x-auto'
+		>
+			<table
+				data-slot='table'
+				className={cn('w-full caption-bottom text-sm', className)}
+				{...props}
+			/>
+		</div>
 	)
 }

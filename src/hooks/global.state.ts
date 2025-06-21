@@ -17,18 +17,20 @@ export function createGlobalState<T>(
 		})
 
 		function setData(data: Partial<T>) {
+			
 			queryClient.setQueryData([queryKey], data)
 		}
 
 		function refetch() {
 			queryClient.invalidateQueries({
-				queryKey: [queryKey],
+				queryKey: [queryKey]
 			})
 			queryClient.refetchQueries({
 				queryKey: [queryKey],
+				
 			})
 		}
 
-		return { data, setData, refetch , isLoading, error }
+		return { data, setData, refetch , isLoading, error, queryClient }
 	}
 }
