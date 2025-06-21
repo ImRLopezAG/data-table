@@ -1,10 +1,10 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import * as CMD from '@/components/ui/command'
-import { rangeFilter } from './data-table-with-columns'
 import { cn } from '@/lib/utils'
 import type { Column, Table } from '@tanstack/react-table'
 import { Check, Plus } from 'lucide-react'
+import { rangeFilter } from './data-table-with-columns'
 
 import {
 	Popover,
@@ -34,7 +34,6 @@ function getRangeFilterCounts<TData>(
 ): Map<string, number> {
 	const counts = new Map<string, number>()
 	const columnId = column.id
-	const allRows = table.getPreFilteredRowModel().rows
 
 	// Check if this is a range filter
 	const isRangeFilter = column.columnDef.meta?.filterVariant === 'range'
@@ -48,9 +47,38 @@ function getRangeFilterCounts<TData>(
 		return counts
 	}
 
-	// For range filters, manually count matching rows
+	// For range filters, we need to count from rows that match all OTHER filters
+	// but ignore the current column's filter to show accurate counts for all options
+	const allRows = table.getPreFilteredRowModel().rows
+
+	// Get all active filters except the current column's filter
+	const otherActiveFilters = table
+		.getAllColumns()
+		.filter((col) => col.id !== columnId && col.getFilterValue() !== undefined)
+
+	// Filter rows by all other active filters
+	const rowsFilteredByOthers = allRows.filter((row) => {
+		return otherActiveFilters.every((otherCol) => {
+			const filterValue = otherCol.getFilterValue()
+			const cellValue = row.getValue(otherCol.id)
+
+			// Handle different filter types
+			if (Array.isArray(filterValue)) {
+				// Multi-select filter (like status filter)
+				if (otherCol.columnDef.meta?.filterVariant === 'range') {
+					return filterValue.some((val) => rangeFilter(cellValue, [val]))
+				}
+				return filterValue.includes(cellValue)
+			}
+
+			// Single value filter
+			return cellValue === filterValue
+		})
+	})
+
+	// Count matching rows for each option
 	for (const option of options) {
-		const count = allRows.filter((row) => {
+		const count = rowsFilteredByOthers.filter((row) => {
 			const value = row.getValue(columnId)
 			return rangeFilter(value, [option.value])
 		}).length

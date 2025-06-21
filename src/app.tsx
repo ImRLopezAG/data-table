@@ -13,7 +13,7 @@ import { dates, values } from './lib/utils'
 function useCommits() {
 	return createGlobalState(
 		'commits',
-		fetch('/api/commits?count=2000').then(async (res) => {
+		fetch('/api/commits?count=5000').then(async (res) => {
 			const json = (await res.json()) as { data: Commit[] }
 			return json.data
 		}),
