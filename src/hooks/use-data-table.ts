@@ -287,30 +287,3 @@ export function useColumnOrderManagement(initialOrder: string[]) {
 		resetOrder,
 	}
 }
-
-// Performance monitoring hook
-export function useTablePerformance<TData>(data: TData[]) {
-	const renderCount = React.useRef(0)
-	const lastRenderTime = React.useRef(Date.now())
-
-	React.useEffect(() => {
-		renderCount.current += 1
-	})
-
-	const metrics = React.useMemo(
-		() => ({
-			renderCount: renderCount.current,
-			dataSize: data.length,
-			lastUpdate: lastRenderTime.current,
-			avgRenderTime:
-				(Date.now() - lastRenderTime.current) / renderCount.current,
-		}),
-		[data],
-	)
-
-	React.useEffect(() => {
-		lastRenderTime.current = Date.now()
-	}, [data])
-
-	return metrics
-}

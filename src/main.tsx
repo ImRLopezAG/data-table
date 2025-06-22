@@ -11,6 +11,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './app'
 
+
 const queryClient = new QueryClient({})
 
 // biome-ignore lint/style/noNonNullAssertion: <explanation>

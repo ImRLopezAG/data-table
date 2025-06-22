@@ -9,7 +9,6 @@ import { useMutation } from '@tanstack/react-query'
 import { CheckCircle, HelpCircle, XCircle } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { dates, values } from './lib/utils'
-
 function useCommits() {
 	return createGlobalState(
 		'commits',
@@ -228,7 +227,7 @@ export const App = () => {
 						},
 					]}
 				/>
-				<DataTable.Pagination type='simple' />
+				<DataTable.Pagination type='complex' />
 			</DataTable>
 		</section>
 	)
