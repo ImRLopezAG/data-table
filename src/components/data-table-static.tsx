@@ -1,4 +1,5 @@
 import {
+	Table,
 	TableBody,
 	TableCell,
 	TableHead,
@@ -35,6 +36,7 @@ interface StaticTableProps<TData> {
 		tableCell?: (cell: Cell<TData, unknown>) => string
 	}
 }
+
 export function StaticTable<TData>({
 	table,
 	columns,
@@ -46,9 +48,7 @@ export function StaticTable<TData>({
 	const { rows } = table.getRowModel()
 
 	return (
-		<Table
-			className={cn('w-full caption-bottom text-sm', classNames?.table)}
-		>
+		<Table className={cn('w-full caption-bottom text-sm', classNames?.table)}>
 			<TableHeader className={cn('sticky top-0 z-10', classNames?.tableHeader)}>
 				{table.getHeaderGroups().map((headerGroup) => (
 					<TableRow key={headerGroup.id}>
@@ -73,7 +73,7 @@ export function StaticTable<TData>({
 					</TableRow>
 				))}
 			</TableHeader>
-			
+
 			<TableBody className={classNames?.tableBody}>
 				{loading ? (
 					// Show skeleton rows while loading
@@ -129,23 +129,5 @@ export function StaticTable<TData>({
 				)}
 			</TableBody>
 		</Table>
-	)
-}
-
-function Table({
-	className,
-	...props
-}: React.ComponentProps<'table'>) {
-	return (
-		<div
-			data-slot='table-container'
-			className='relative w-full overflow-x-auto'
-		>
-			<table
-				data-slot='table'
-				className={cn('w-full caption-bottom text-sm', className)}
-				{...props}
-			/>
-		</div>
 	)
 }

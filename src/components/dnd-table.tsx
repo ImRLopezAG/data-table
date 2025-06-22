@@ -14,7 +14,6 @@ import {
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers'
 import {
 	SortableContext,
-	arrayMove,
 	horizontalListSortingStrategy,
 	useSortable,
 } from '@dnd-kit/sortable'
@@ -37,7 +36,7 @@ import { cn } from '@/lib/utils'
 export interface DraggableTableProps<TData> {
 	table: TTable<TData>
 	columnOrder: string[]
-	handleChangeColumnOrder: (columnOrder: string[]) => void
+	handleDragEnd: (activeId: string, overId: string) => void
 	loading?: boolean
 	classNames?: {
 		container?: string
@@ -56,7 +55,7 @@ export function DraggableTable<TData>({
 	table,
 	columnOrder,
 	classNames,
-	handleChangeColumnOrder,
+	handleDragEnd,
 	loading = false,
 }: DraggableTableProps<TData>) {
 	const sensors = useSensors(
@@ -74,24 +73,21 @@ export function DraggableTable<TData>({
 		useSensor(KeyboardSensor),
 	)
 
-	const handleDragEnd = useCallback(
+	const onHandleDragEnd = useCallback(
 		(event: DragEndEvent) => {
 			const { active, over } = event
 			if (active && over && active.id !== over.id) {
-				const oldIndex = columnOrder.indexOf(active.id as string)
-				const newIndex = columnOrder.indexOf(over.id as string)
-				const newColumnOrder = arrayMove([...columnOrder], oldIndex, newIndex)
-				handleChangeColumnOrder(newColumnOrder)
+				handleDragEnd(active.id as string, over.id as string)
 			}
 		},
-		[columnOrder, handleChangeColumnOrder],
+		[handleDragEnd],
 	)
 	return (
 		<DndContext
 			sensors={sensors}
 			collisionDetection={closestCenter}
 			modifiers={[restrictToHorizontalAxis]}
-			onDragEnd={handleDragEnd}
+			onDragEnd={onHandleDragEnd}
 		>
 			<Table className={classNames?.table}>
 				<TableHeader className={classNames?.tableHeader}>
@@ -229,4 +225,6 @@ function DragAlongCell<TData, TValue>({
 
 export default DraggableTable
 
-export type DndTaleComponent = typeof DraggableTable
+export type DndTaleComponent = <TData>(
+	props: DraggableTableProps<TData>,
+) => React.JSX.Element

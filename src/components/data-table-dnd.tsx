@@ -1,5 +1,5 @@
 'use client'
-import { useDataTable } from '@/hooks/use-data-table'
+import { useColumnOrderManagement, useDataTable } from '@/hooks/use-data-table'
 import { cn } from '@/lib/utils'
 import type { Cell, ColumnDef, Header, Row, Table } from '@tanstack/react-table'
 import React, { Suspense, createContext, lazy, use } from 'react'
@@ -7,12 +7,12 @@ import type { DataTablePaginationProps } from './data-table-pagination'
 import { StaticTable } from './data-table-static'
 import type { DataTableToolbarProps } from './data-table-toolbar'
 import { withColumns } from './data-table-with-columns'
-import type { DndTaleComponent } from './dnd-table'
 
 const LazyDataTablePagination = lazy(() => import('./data-table-pagination'))
 const LazyDataTableToolbar = lazy(() => import('./data-table-toolbar'))
-const LazyDraggableTable = lazy(() => import('./dnd-table')) as DndTaleComponent
+const LazyDraggableTable = lazy(() => import('./dnd-table'))
 
+// Generic wrapper to preserve types with lazy loading
 interface DataTableProps<TData> {
 	data: TData[]
 	columns: {
@@ -68,13 +68,8 @@ export function DataTable<TData>({
 
 	const hasPagination = paginationChildren.length > 0
 
-	const {
-		table,
-		columnOrder,
-		handleChangeColumnOrder,
-		virtualizer,
-		parentRef,
-	} = useDataTable({
+	// Use optimized data table hook
+	const { table, virtualizer, parentRef, state, handlers } = useDataTable({
 		columns: buildedColumns,
 		data: props.data,
 		onDataChange: props.onDataChange,
@@ -84,20 +79,49 @@ export function DataTable<TData>({
 					pageSize: props.pagination?.pageSize,
 				}
 			: { enabled: false },
+		virtualization: {
+			enabled: true,
+			estimateSize: 10,
+			overscan: 10,
+		},
+		enableRowSelection: true,
+		enableSorting: true,
+		enableFiltering: true,
+		enableColumnVisibility: true,
 	})
+
+	// Column order management for drag & drop
+	const { columnOrder, handleDragEnd } = useColumnOrderManagement(
+		state.columnOrder,
+	)
+
+	// Update column order when it changes from drag & drop
+	React.useEffect(() => {
+		if (props.draggable && columnOrder !== state.columnOrder) {
+			handlers.updateColumnOrder(columnOrder)
+		}
+	}, [
+		columnOrder,
+		state.columnOrder,
+		props.draggable,
+		handlers.updateColumnOrder,
+	])
 
 	return (
 		<DataTableContext.Provider value={{ table }}>
 			<div className='space-y-4'>
 				{toolbarChildren}
 
-				<div className={cn(props.classNames?.container, 'rounded-md border')} ref={parentRef}>
+				<div
+					className={cn(props.classNames?.container, 'rounded-md border')}
+					ref={parentRef}
+				>
 					{props.draggable ? (
 						<Suspense fallback={<div>Loading...</div>}>
-							<LazyDraggableTable
-								table={table as Table<TData>}
+							<LazyDraggableTableWrapper
+								table={table}
 								columnOrder={columnOrder}
-								handleChangeColumnOrder={handleChangeColumnOrder}
+								handleDragEnd={handleDragEnd}
 								classNames={props.classNames}
 								loading={props.loading}
 							/>
@@ -150,4 +174,46 @@ DataTable.Pagination = function DT_Pagination<TData>(
 			<LazyDataTablePagination table={table} {...props} />
 		</Suspense>
 	)
+}
+
+
+
+function LazyDraggableTableWrapper<TData>(props: {
+	table: Table<TData>
+	columnOrder: string[]
+	handleDragEnd: (activeId: string, overId: string) => void
+	loading?: boolean
+	classNames?: {
+		container?: string
+		table?: string
+		tableHeader?: string
+		tableHead?: (header: Header<TData, unknown>) => string
+		tableBody?: string
+		tableRow?: (row: Row<TData>) => string
+		tableCell?: (cell: Cell<TData, unknown>) => string
+	}
+}) {
+	// Type-safe props for the lazy component
+	const draggableProps = {
+		table: props.table as Table<unknown>, // Type assertion to work around lazy loading type loss
+		columnOrder: props.columnOrder,
+		handleDragEnd: props.handleDragEnd,
+		loading: props.loading,
+		classNames: props.classNames
+			? {
+					...props.classNames,
+					tableHead: props.classNames.tableHead as
+						| ((header: Header<unknown, unknown>) => string)
+						| undefined,
+					tableRow: props.classNames.tableRow as
+						| ((row: Row<unknown>) => string)
+						| undefined,
+					tableCell: props.classNames.tableCell as
+						| ((cell: Cell<unknown, unknown>) => string)
+						| undefined,
+				}
+			: undefined,
+	}
+
+	return <LazyDraggableTable {...draggableProps} />
 }

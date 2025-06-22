@@ -1,14 +1,12 @@
 'use client'
-import { useDataTable } from '@/hooks/use-data-table'
 import { cn } from '@/lib/utils'
 import type { Cell, ColumnDef, Header, Row, Table } from '@tanstack/react-table'
-import React, { createContext, use } from 'react'
+import React, { Suspense, createContext, lazy, use } from 'react'
 import type { DataTablePaginationProps } from './data-table-pagination'
 import { StaticTable } from './data-table-static'
 import type { DataTableToolbarProps } from './data-table-toolbar'
 import { withColumns } from './data-table-with-columns'
-
-import { Suspense, lazy } from 'react'
+import { useDataTable } from '@/hooks/use-data-table'
 
 const LazyDataTablePagination = lazy(() => import('./data-table-pagination'))
 const LazyDataTableToolbar = lazy(() => import('./data-table-toolbar'))
@@ -52,6 +50,7 @@ export function DataTable<TData>({
 	children,
 	...props
 }: DataTableProps<TData>) {
+	// Memoize built columns to prevent unnecessary recalculations
 	const buildedColumns = React.useMemo(
 		() => withColumns<TData>(props.columns),
 		[props.columns],
@@ -65,7 +64,8 @@ export function DataTable<TData>({
 
 	const hasPagination = paginationChildren.length > 0
 
-	const { table, virtualizer, parentRef } = useDataTable({
+	// Use optimized data table hook
+	const { table, virtualizer, parentRef, metrics } = useDataTable({
 		columns: buildedColumns,
 		data: props.data,
 		onDataChange: props.onDataChange,
@@ -75,6 +75,15 @@ export function DataTable<TData>({
 					pageSize: props.pagination?.pageSize,
 				}
 			: { enabled: false },
+		virtualization: {
+			enabled: true,
+			estimateSize: 20,
+			overscan: 10,
+		},
+		enableRowSelection: true,
+		enableSorting: true,
+		enableFiltering: true,
+		enableColumnVisibility: true,
 	})
 
 	// Split children into their respective components
@@ -82,19 +91,29 @@ export function DataTable<TData>({
 		(child) => React.isValidElement(child) && child.type === DataTable.Toolbar,
 	)
 
+	// Performance monitoring in development
+	React.useEffect(() => {
+		if (process.env.NODE_ENV === 'development' && props.devtools) {
+			console.log('DataTable Performance Metrics:', metrics)
+		}
+	}, [metrics, props.devtools])
+
 	return (
 		<DataTableContext.Provider value={{ table }}>
 			<div className='space-y-4'>
 				{toolbarChildren}
 
-				<div className={cn(props.classNames?.container, 'rounded-md border')} ref={parentRef}>
+				<div
+					className={cn(props.classNames?.container, 'rounded-md border')}
+					ref={parentRef}
+				>
 					<StaticTable
 						table={table}
+						columns={buildedColumns}
+						emptyState={props.emptyState || <div>No data available</div>}
+						loading={props.loading}
 						virtualizer={virtualizer}
 						classNames={props.classNames}
-						columns={buildedColumns}
-						emptyState={props.emptyState}
-						loading={props.loading}
 					/>
 				</div>
 

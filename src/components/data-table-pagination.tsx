@@ -8,13 +8,14 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select'
+import React from 'react'
 
 export interface DataTablePaginationProps<TData> {
 	table: Table<TData>
 	type: 'simple' | 'complex'
 }
 
-export function DataTablePagination<TData>({
+function DataTablePagination<TData>({
 	table,
 	type,
 }: DataTablePaginationProps<TData>) {
@@ -126,5 +127,6 @@ export function DataTablePagination<TData>({
 	}
 	return Component[type]()
 }
+
 
 export default DataTablePagination
