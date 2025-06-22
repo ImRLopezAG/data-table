@@ -1,17 +1,26 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "strict": true,
-    "skipLibCheck": true,
-    "lib": [
-      "ESNext",
-      "DOM",
-    ],
-    "types": ["vite/client", "./worker-configuration.d.ts"],
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
+    "esModuleInterop": true,
+		"skipLibCheck": true,
+		"target": "ES2024",
+		"allowJs": true,
+		"resolveJsonModule": true,
+		"moduleDetection": "force",
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
+
+		/* Strictness */
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"checkJs": true,
+
+		/* Bundled projects */
+		"lib": ["dom", "dom.iterable", "ES2024"],
+		"noEmit": true,
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"jsx": "preserve",
+		"incremental": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

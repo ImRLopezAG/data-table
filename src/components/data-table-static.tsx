@@ -89,6 +89,7 @@ export function StaticTable<TData>({
 				) : virtualizer.getVirtualItems().length ? (
 					virtualizer.getVirtualItems().map((virtualRow, index) => {
 						const row = rows[virtualRow.index]
+						if (!row) return null
 						return (
 							<TableRow
 								key={row.id}
