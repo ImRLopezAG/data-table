@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import type { Commit } from '@/services/commit'
 import { useMutation } from '@tanstack/react-query'
 import { CheckCircle, HelpCircle, XCircle } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { dates, values } from './lib/utils'
 
 function useCommits() {
@@ -20,26 +20,23 @@ function useCommits() {
 	)()
 }
 
-const status = ['success', 'failed', 'pending'].map((value) => ({
-	value,
-	icon:
-		value === 'success'
-			? CheckCircle
-			: value === 'failed'
-				? XCircle
-				: HelpCircle,
-	label: value.charAt(0).toUpperCase() + value.slice(1),
-}))
+// Memoize status options to prevent recreating on every render
+
 
 export const App = () => {
 	const [draggable, setDraggable] = useState(false)
 	const [testLoading, setTestLoading] = useState(false)
-	const toggleDraggable = () => setDraggable((prev) => !prev)
+
+	// Memoize toggle function
+	const toggleDraggable = useCallback(() => setDraggable((prev) => !prev), [])
+
 	const { data, refetch, isLoading, queryClient } = useCommits()
-	const triggerTestLoading = () => {
+
+	// Memoize test loading function
+	const triggerTestLoading = useCallback(() => {
 		setTestLoading(true)
 		setTimeout(() => setTestLoading(false), 3000)
-	}
+	}, [])
 
 	const updateCommit = useMutation({
 		mutationFn: async (commit: Partial<Commit>) => {
@@ -79,9 +76,23 @@ export const App = () => {
 			if (context?.previousData) {
 				queryClient.setQueryData(['commits'], context.previousData)
 			}
-		}
+		},
 	})
 
+	const status = useMemo(
+	() =>
+		['success', 'failed', 'pending'].map((value) => ({
+			value,
+			icon:
+				value === 'success'
+					? CheckCircle
+					: value === 'failed'
+						? XCircle
+						: HelpCircle,
+			label: value.charAt(0).toUpperCase() + value.slice(1),
+		})),
+	[],
+)
 	return (
 		<section className='space-y-4 p-4'>
 			<div className='mb-12 flex items-baseline gap-4'>
