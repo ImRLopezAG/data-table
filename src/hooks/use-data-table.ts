@@ -40,7 +40,7 @@ interface TableState {
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[]
 	data: TData[]
-	onDataChange?: (data: TData, hasChange: boolean) => void
+	onDataChange?: (data: TData) => void
 	pagination?: {
 		enabled: boolean
 		pageSize?: number
@@ -104,14 +104,16 @@ export function useDataTable<TData, TValue>({
 			updateData: React.useCallback(
 				(rowIndex: number, columnId: string, value: unknown) => {
 					if (onDataChange) {
+						const oldValue = (data[rowIndex] as Record<string, unknown>)[
+							columnId
+						]
+						if (oldValue === value) return
 						const updatedData = [...data]
 						const rowData = { ...updatedData[rowIndex] } as TData
 						;(rowData as Record<string, unknown>)[columnId] = value
 						updatedData[rowIndex] = rowData
-						const oldValue = (data[rowIndex] as Record<string, unknown>)[
-							columnId
-						]
-						onDataChange(rowData, oldValue !== value)
+
+						onDataChange(rowData)
 					}
 				},
 				[data, onDataChange],

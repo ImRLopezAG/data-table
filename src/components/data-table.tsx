@@ -61,7 +61,7 @@ interface DataTableProps<TData> {
 		tableCell?: (cell: Cell<TData, unknown>) => string
 	}
 	devtools?: boolean
-	onDataChange?: (data: TData, hasChange: boolean) => void
+	onDataChange?: (data: TData) => void
 	children?: React.ReactNode
 }
 
