@@ -1,4 +1,4 @@
-import { DataTable } from '@/components/data-table-dnd'
+import { createDataTableDnd } from '@/components/data-table-dnd'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
@@ -21,7 +21,7 @@ function useCommits() {
 
 // Memoize status options to prevent recreating on every render
 
-
+const CommitTable = createDataTableDnd<Commit>()
 export const App = () => {
 	const [draggable, setDraggable] = useState(false)
 	const [testLoading, setTestLoading] = useState(false)
@@ -79,19 +79,19 @@ export const App = () => {
 	})
 
 	const status = useMemo(
-	() =>
-		['success', 'failed', 'pending'].map((value) => ({
-			value,
-			icon:
-				value === 'success'
-					? CheckCircle
-					: value === 'failed'
-						? XCircle
-						: HelpCircle,
-			label: value.charAt(0).toUpperCase() + value.slice(1),
-		})),
-	[],
-)
+		() =>
+			['success', 'failed', 'pending'].map((value) => ({
+				value,
+				icon:
+					value === 'success'
+						? CheckCircle
+						: value === 'failed'
+							? XCircle
+							: HelpCircle,
+				label: value.charAt(0).toUpperCase() + value.slice(1),
+			})),
+		[],
+	)
 	return (
 		<section className='space-y-4 p-4'>
 			<div className='mb-12 flex items-baseline gap-4'>
@@ -126,10 +126,10 @@ export const App = () => {
 					Test Loading
 				</Button>
 			</div>
-			<DataTable
+			<CommitTable
 				draggable={draggable}
 				loading={isLoading || testLoading}
-				onDataChange={(_data, changes) => {
+				onDataChange={(changes) => {
 					updateCommit.mutate(changes)
 				}}
 				data={data ?? []}
@@ -147,64 +147,8 @@ export const App = () => {
 						})
 					},
 				}}
-				columns={{
-					withSelect: true,
-					columns: [
-						{
-							accessorKey: 'hash',
-							cell: ({ row }) => row.original.hash.slice(0, 7),
-							meta: {
-								filterHeader: 'Hash',
-							},
-						},
-						{
-							accessorKey: 'message',
-							cell: ({ row }) => row.original.message,
-							meta: {
-								editable: true,
-								filterHeader: 'Message',
-							},
-						},
-						{
-							accessorKey: 'author',
-							cell: ({ row }) => row.original.author,
-							meta: {
-								editable: true,
-								filterHeader: 'Author',
-							},
-						},
-						{
-							accessorKey: 'date',
-							cell: ({ row }) =>
-								new Intl.DateTimeFormat('en-US', {
-									formatMatcher: 'basic',
-									dateStyle: 'medium',
-								}).format(new Date(row.original.date)),
-							meta: {
-								filterVariant: 'range',
-								filterHeader: 'Date',
-							},
-						},
-						{
-							accessorKey: 'value',
-							cell: ({ row }) => row.original.value,
-							meta: {
-								filterVariant: 'range',
-								filterHeader: 'Value',
-							},
-						},
-						{
-							accessorKey: 'status',
-							header: 'Status',
-							cell: ({ row }) => row.original.status,
-							meta: {
-								filterVariant: 'multi-select',
-							},
-						},
-					],
-				}}
 			>
-				<DataTable.Toolbar
+				<CommitTable.Toolbar
 					filter={{
 						column: 'message',
 						placeholder: 'Search by message...',
@@ -227,10 +171,121 @@ export const App = () => {
 						},
 					]}
 				/>
-				<DataTable.Pagination type='complex' />
-			</DataTable>
+				<CommitTable.Column accessorKey='hash' filterHeader='Hash'>
+					{({ row }) => row.original.hash.slice(0, 7)}
+				</CommitTable.Column>
+				<CommitTable.Column
+					accessorKey='message'
+					filterHeader='Message'
+					editable
+				>
+					{({ row }) => row.original.message}
+				</CommitTable.Column>
+				<CommitTable.Column accessorKey='author' filterHeader='Author' editable>
+					{({ row }) => row.original.author}
+				</CommitTable.Column>
+				<CommitTable.Column
+					accessorKey='date'
+					filterHeader='Date'
+					filterVariant='range'
+				>
+					{({ row }) =>
+						new Intl.DateTimeFormat('en-US', {
+							formatMatcher: 'basic',
+							dateStyle: 'medium',
+						}).format(new Date(row.original.date))
+					}
+				</CommitTable.Column>
+				<CommitTable.Column
+					accessorKey='value'
+					filterHeader='Value'
+					filterVariant='range'
+				>
+					{({ row }) => row.original.value}
+				</CommitTable.Column>
+				<CommitTable.Column
+					accessorKey='status'
+					header='Status'
+					filterVariant='multi-select'
+				>
+					{({ row }) => {
+						const status = row.original.status
+						const Icon =
+							{
+								success: CheckCircle,
+								failed: XCircle,
+								pending: HelpCircle,
+							}[status] || HelpCircle
+
+						return (
+							<div className='flex items-center gap-2'>
+								<Icon className='size-4' />
+								{status}
+							</div>
+						)
+					}}
+				</CommitTable.Column>
+				<CommitTable.Pagination type='complex' />
+			</CommitTable>
 		</section>
 	)
 }
 
 export default App
+
+// columns={{
+// 					withSelect: true,
+// 					columns: [
+// 						{
+// 							accessorKey: 'hash',
+// 							cell: ({ row }) => row.original.hash.slice(0, 7),
+// 							meta: {
+// 								filterHeader: 'Hash',
+// 							},
+// 						},
+// 						{
+// 							accessorKey: 'message',
+// 							cell: ({ row }) => row.original.message,
+// 							meta: {
+// 								editable: true,
+// 								filterHeader: 'Message',
+// 							},
+// 						},
+// 						{
+// 							accessorKey: 'author',
+// 							cell: ({ row }) => row.original.author,
+// 							meta: {
+// 								editable: true,
+// 								filterHeader: 'Author',
+// 							},
+// 						},
+// 						{
+// 							accessorKey: 'date',
+// 							cell: ({ row }) =>
+// 								new Intl.DateTimeFormat('en-US', {
+// 									formatMatcher: 'basic',
+// 									dateStyle: 'medium',
+// 								}).format(new Date(row.original.date)),
+// 							meta: {
+// 								filterVariant: 'range',
+// 								filterHeader: 'Date',
+// 							},
+// 						},
+// 						{
+// 							accessorKey: 'value',
+// 							cell: ({ row }) => row.original.value,
+// 							meta: {
+// 								filterVariant: 'range',
+// 								filterHeader: 'Value',
+// 							},
+// 						},
+// 						{
+// 							accessorKey: 'status',
+// 							header: 'Status',
+// 							cell: ({ row }) => row.original.status,
+// 							meta: {
+// 								filterVariant: 'multi-select',
+// 							},
+// 						},
+// 					],
+// 				}}
