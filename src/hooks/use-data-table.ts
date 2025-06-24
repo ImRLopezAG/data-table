@@ -13,15 +13,18 @@ import {
 	useReactTable,
 } from '@tanstack/react-table'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import React, { useRef, useState } from 'react'
+import React from 'react'
 
 declare module '@tanstack/react-table' {
+	// biome-ignore lint/correctness/noUnusedVariables: <explanation>
 	interface ColumnMeta<TData, TValue> {
 		filterVariant?: 'text' | 'range' | 'select' | 'multi-select'
 		editable?: boolean
 		filterHeader?: string
 	}
-	interface TableMeta<TData> {		updateData: (rowIndex: number, columnId: string, value: unknown) => void
+	// biome-ignore lint/correctness/noUnusedVariables: <explanation>
+	interface TableMeta<TData> {
+		updateData: (rowIndex: number, columnId: string, value: unknown) => void
 	}
 }
 
@@ -34,48 +37,10 @@ interface TableState {
 	columnOrder: string[]
 }
 
-// Table state actions
-type TableStateAction =
-	| { type: 'SET_SORTING'; payload: SortingState }
-	| { type: 'SET_COLUMN_FILTERS'; payload: ColumnFiltersState }
-	| { type: 'SET_COLUMN_VISIBILITY'; payload: VisibilityState }
-	| { type: 'SET_ROW_SELECTION'; payload: RowSelectionState }
-	| { type: 'SET_COLUMN_ORDER'; payload: string[] }
-	| { type: 'RESET_STATE' }
-
-// Table state reducer for better state management
-function tableStateReducer(
-	state: TableState,
-	action: TableStateAction,
-): TableState {
-	switch (action.type) {
-		case 'SET_SORTING':
-			return { ...state, sorting: action.payload }
-		case 'SET_COLUMN_FILTERS':
-			return { ...state, columnFilters: action.payload }
-		case 'SET_COLUMN_VISIBILITY':
-			return { ...state, columnVisibility: action.payload }
-		case 'SET_ROW_SELECTION':
-			return { ...state, rowSelection: action.payload }
-		case 'SET_COLUMN_ORDER':
-			return { ...state, columnOrder: action.payload }
-		case 'RESET_STATE':
-			return {
-				sorting: [],
-				columnFilters: [],
-				columnVisibility: {},
-				rowSelection: {},
-				columnOrder: [],
-			}
-		default:
-			return state
-	}
-}
-
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[]
 	data: TData[]
-	onDataChange?: (data: TData[], changes: TData) => void
+	onDataChange?: (data: TData, hasChange: boolean) => void
 	pagination?: {
 		enabled: boolean
 		pageSize?: number
@@ -96,7 +61,7 @@ export function useDataTable<TData, TValue>({
 	data,
 	onDataChange,
 	pagination,
-	virtualization = { enabled: true, estimateSize: 50, overscan: 10 },
+	virtualization = { enabled: true, estimateSize: 10, overscan: 10 },
 	enableRowSelection = true,
 	enableSorting = true,
 	enableFiltering = true,
@@ -130,7 +95,7 @@ export function useDataTable<TData, TValue>({
 		...(isPaginationEnabled && {
 			initialState: {
 				pagination: {
-					pageSize: pagination?.pageSize ?? 10,
+					pageSize: pagination?.pageSize ?? 20,
 				},
 			},
 		}),
@@ -143,7 +108,10 @@ export function useDataTable<TData, TValue>({
 						const rowData = { ...updatedData[rowIndex] } as TData
 						;(rowData as Record<string, unknown>)[columnId] = value
 						updatedData[rowIndex] = rowData
-						onDataChange(updatedData, rowData)
+						const oldValue = (data[rowIndex] as Record<string, unknown>)[
+							columnId
+						]
+						onDataChange(rowData, oldValue !== value)
 					}
 				},
 				[data, onDataChange],
@@ -285,5 +253,43 @@ export function useColumnOrderManagement(initialOrder: string[]) {
 		setColumnOrder,
 		handleDragEnd,
 		resetOrder,
+	}
+}
+
+// Table state actions
+type TableStateAction =
+	| { type: 'SET_SORTING'; payload: SortingState }
+	| { type: 'SET_COLUMN_FILTERS'; payload: ColumnFiltersState }
+	| { type: 'SET_COLUMN_VISIBILITY'; payload: VisibilityState }
+	| { type: 'SET_ROW_SELECTION'; payload: RowSelectionState }
+	| { type: 'SET_COLUMN_ORDER'; payload: string[] }
+	| { type: 'RESET_STATE' }
+
+// Table state reducer for better state management
+function tableStateReducer(
+	state: TableState,
+	action: TableStateAction,
+): TableState {
+	switch (action.type) {
+		case 'SET_SORTING':
+			return { ...state, sorting: action.payload }
+		case 'SET_COLUMN_FILTERS':
+			return { ...state, columnFilters: action.payload }
+		case 'SET_COLUMN_VISIBILITY':
+			return { ...state, columnVisibility: action.payload }
+		case 'SET_ROW_SELECTION':
+			return { ...state, rowSelection: action.payload }
+		case 'SET_COLUMN_ORDER':
+			return { ...state, columnOrder: action.payload }
+		case 'RESET_STATE':
+			return {
+				sorting: [],
+				columnFilters: [],
+				columnVisibility: {},
+				rowSelection: {},
+				columnOrder: [],
+			}
+		default:
+			return state
 	}
 }

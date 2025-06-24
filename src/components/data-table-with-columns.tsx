@@ -1,9 +1,9 @@
 import { Checkbox } from '@/components/ui/checkbox'
 import type { ColumnDef, Row, Table } from '@tanstack/react-table'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { DataTableColumnHeader } from './data-table-column-header'
 interface Props<TData> {
-	columns: ColumnDef<TData>[]
+	columns: Array<ColumnDef<TData>>
 	rowAction?: (row: Row<TData>) => React.ReactNode
 	withSelect?: boolean
 }
@@ -118,26 +118,22 @@ const EditableCell = <TData, TValue>({
 	table,
 }: EditableCellProps<TData, TValue>) => {
 	const initialValue = getValue()
-	const [value, setValue] = useState(initialValue)
+	const [value, setValue] = React.useState(initialValue)
 
 	const onBlur = () => {
 		table.options.meta?.updateData(rowIndex, columnId, value)
 	}
 
-	useEffect(() => {
-		setValue(initialValue)
-	}, [initialValue])
-
 	return (
 		<input
+			type='text'
 			value={value as string}
 			onChange={(e) => setValue(e.target.value as unknown as TValue)}
 			onBlur={onBlur}
-			className='w-full bg-transparent'
+			className='*: h-fit w-full text-ellipsis border-none bg-none bg-transparent px-0 py-0.5 shadow-none focus:border-0 focus:border-none focus:outline-none focus-visible:border-0 focus-visible:ring-0'
 		/>
 	)
 }
-
 
 export function rangeFilter(value: unknown, filterValue: Array<string>) {
 	const parsedValue = parseValue(value)

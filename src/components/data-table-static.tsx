@@ -108,7 +108,7 @@ export function StaticTable<TData>({
 									<TableCell
 										key={cell.id}
 										className={cn(
-											'p-1 align-baseline',
+											'px-1 py-0',
 											classNames?.tableCell ? classNames.tableCell(cell) : '',
 										)}
 									>
