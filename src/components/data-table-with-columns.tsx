@@ -1,5 +1,6 @@
 import { Checkbox } from '@/components/ui/checkbox'
 import type { ColumnDef, Row, Table } from '@tanstack/react-table'
+import { EllipsisVerticalIcon } from 'lucide-react'
 import React from 'react'
 import { DataTableColumnHeader } from './data-table-column-header'
 interface Props<TData> {
@@ -51,16 +52,66 @@ export function withColumns<TData>({
 			}),
 		}
 		if (enhancedColumn.meta?.editable) {
+			// Store the original cell function for comparison
+			const originalCell = column.cell
+
 			return {
 				...enhancedColumn,
-				cell: ({ row, column, getValue, table }) => (
-					<EditableCell
-						getValue={getValue}
-						rowIndex={row.index}
-						columnId={column.id}
-						table={table}
-					/>
-				),
+				// For editable columns, override the cell to conditionally use EditableCell
+				cell: (cellContext) => {
+					const { row, column, getValue, table } = cellContext
+
+					// If there's no original cell, use EditableCell
+					if (!originalCell) {
+						return (
+							<EditableCell
+								getValue={getValue}
+								rowIndex={row.index}
+								columnId={column.id}
+								table={table}
+							/>
+						)
+					}
+
+					// Get the original value
+					const originalValue = getValue()
+
+					// Handle different types of cell definitions
+					let originalResult: React.ReactNode
+					if (typeof originalCell === 'function') {
+						originalResult = originalCell(cellContext)
+					} else {
+						originalResult = originalCell
+					}
+
+					// Check if the original result is "simple" - just displaying the raw value
+					// This handles cases where children just return row.original.fieldName
+					const isSimpleValue =
+						originalResult === originalValue ||
+						originalResult === String(originalValue) ||
+						originalResult === Number(originalValue) ||
+						// Check if it's a React element wrapping just the value
+						(React.isValidElement(originalResult) &&
+							(
+								originalResult as React.ReactElement<{
+									children?: React.ReactNode
+								}>
+							).props?.children === originalValue)
+
+					if (isSimpleValue) {
+						return (
+							<EditableCell
+								getValue={getValue}
+								rowIndex={row.index}
+								columnId={column.id}
+								table={table}
+							/>
+						)
+					}
+
+					// Otherwise, use the custom cell content (complex rendering)
+					return originalResult
+				},
 			}
 		}
 		return enhancedColumn
@@ -125,13 +176,16 @@ const EditableCell = <TData, TValue>({
 	}
 
 	return (
-		<input
-			type='text'
-			value={value as string}
-			onChange={(e) => setValue(e.target.value as unknown as TValue)}
-			onBlur={onBlur}
-			className='*: h-fit w-full text-ellipsis border-none bg-none bg-transparent px-0 py-0.5 shadow-none focus:border-0 focus:border-none focus:outline-none focus-visible:border-0 focus-visible:ring-0'
-		/>
+		<div className='flex h-full w-full items-center justify-start'>
+			<input
+				type='text'
+				value={value as string}
+				onChange={(e) => setValue(e.target.value as unknown as TValue)}
+				onBlur={onBlur}
+				className='*: h-fit w-full text-ellipsis border-none bg-none bg-transparent px-0 py-0.5 shadow-none focus:border-0 focus:border-none focus:outline-none focus-visible:border-0 focus-visible:ring-0'
+			/>
+			<EllipsisVerticalIcon className='size-4 text-gray-500' />
+		</div>
 	)
 }
 
