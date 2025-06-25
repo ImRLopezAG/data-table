@@ -12,7 +12,7 @@ api.get('/commits', (c) => {
 			commits.set(commit.hash, commit)
 		}
 	}
-
+	
 	const limit = count ? Number(count) : 100
 	const commitArray = Array.from(commits.values()).slice(0, limit)
 	return c.json({ data: commitArray })

@@ -1,12 +1,25 @@
 import { createDataTableDnd } from '@/components/data-table-dnd'
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover'
+
 import { createGlobalState } from '@/hooks/global.state'
 import { cn } from '@/lib/utils'
 import type { Commit } from '@/services/commit'
 import { useMutation } from '@tanstack/react-query'
-import { CheckCircle, HelpCircle, XCircle } from 'lucide-react'
+import {
+	CalendarClock,
+	CheckCircle,
+	ChevronDown,
+	HelpCircle,
+	XCircle,
+} from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { dates, values } from './lib/utils'
 function useCommits() {
@@ -188,13 +201,40 @@ export const App = () => {
 					accessorKey='date'
 					filterHeader='Date'
 					filterVariant='range'
+					editable
 				>
-					{({ row }) =>
-						new Intl.DateTimeFormat('en-US', {
-							formatMatcher: 'basic',
-							dateStyle: 'medium',
-						}).format(new Date(row.original.date))
-					}
+					{({ row }) => {
+						const [open, setOpen] = useState(false)
+						return (
+							<Popover open={open} onOpenChange={setOpen}>
+								<PopoverTrigger asChild>
+									<div className='flex h-full w-full items-center justify-between'>
+										<Button variant='ghost' className='h-6 px-2'>
+											{new Intl.DateTimeFormat('en-US', {
+												dateStyle: 'medium',
+												calendar: 'gregory',
+											}).format(new Date(row.original.date))}
+										</Button>
+										<CalendarClock className='size-4 text-gray-500' />
+									</div>
+								</PopoverTrigger>
+								<PopoverContent className=''>
+									<Calendar
+										mode='single'
+										selected={new Date(row.original.date)}
+										onSelect={(date) => {
+											if (date) {
+												updateCommit.mutate({
+													hash: row.original.hash,
+													date: date.toISOString(),
+												})
+											}
+										}}
+									/>
+								</PopoverContent>
+							</Popover>
+						)
+					}}
 				</CommitTable.Column>
 				<CommitTable.Column
 					accessorKey='value'
@@ -209,83 +249,54 @@ export const App = () => {
 					filterVariant='multi-select'
 				>
 					{({ row }) => {
-						const status = row.original.status
+						const currentStatus = row.original.status
 						const Icon =
 							{
 								success: CheckCircle,
 								failed: XCircle,
 								pending: HelpCircle,
-							}[status] || HelpCircle
+							}[currentStatus] || HelpCircle
 
 						return (
-							<div className='flex items-center gap-2'>
-								<Icon className='size-4' />
-								{status}
-							</div>
+							<Popover>
+								<PopoverTrigger asChild>
+									<div className='flex h-full w-full items-center justify-between'>
+										<Button variant='ghost' className='h-6 px-2'>
+											<Icon className='size-4 text-gray-500' />
+											<span className='ml-2'>
+												{currentStatus.charAt(0).toUpperCase() +
+													currentStatus.slice(1)}
+											</span>
+										</Button>
+										<ChevronDown className='size-4 text-gray-500' />
+									</div>
+								</PopoverTrigger>
+								<PopoverContent className='w-48'>
+									<div className='flex flex-col gap-2'>
+										{status.map((option) => (
+											<Button
+												key={option.value}
+												variant='ghost'
+												className='justify-start'
+												onClick={() => {
+													updateCommit.mutate({
+														hash: row.original.hash,
+														status: option.value as Commit['status'],
+													})
+												}}
+											>
+												<option.icon className='size-4 text-gray-500' />
+												<span className='ml-2'>{option.label}</span>
+											</Button>
+										))}
+									</div>
+								</PopoverContent>
+							</Popover>
 						)
 					}}
 				</CommitTable.Column>
-				<CommitTable.Pagination type='complex' />
+				<CommitTable.Pagination type='simple' />
 			</CommitTable>
 		</section>
 	)
 }
-
-export default App
-
-// columns={{
-// 					withSelect: true,
-// 					columns: [
-// 						{
-// 							accessorKey: 'hash',
-// 							cell: ({ row }) => row.original.hash.slice(0, 7),
-// 							meta: {
-// 								filterHeader: 'Hash',
-// 							},
-// 						},
-// 						{
-// 							accessorKey: 'message',
-// 							cell: ({ row }) => row.original.message,
-// 							meta: {
-// 								editable: true,
-// 								filterHeader: 'Message',
-// 							},
-// 						},
-// 						{
-// 							accessorKey: 'author',
-// 							cell: ({ row }) => row.original.author,
-// 							meta: {
-// 								editable: true,
-// 								filterHeader: 'Author',
-// 							},
-// 						},
-// 						{
-// 							accessorKey: 'date',
-// 							cell: ({ row }) =>
-// 								new Intl.DateTimeFormat('en-US', {
-// 									formatMatcher: 'basic',
-// 									dateStyle: 'medium',
-// 								}).format(new Date(row.original.date)),
-// 							meta: {
-// 								filterVariant: 'range',
-// 								filterHeader: 'Date',
-// 							},
-// 						},
-// 						{
-// 							accessorKey: 'value',
-// 							cell: ({ row }) => row.original.value,
-// 							meta: {
-// 								filterVariant: 'range',
-// 								filterHeader: 'Value',
-// 							},
-// 						},
-// 						{
-// 							accessorKey: 'status',
-// 							header: 'Status',
-// 							cell: ({ row }) => row.original.status,
-// 							meta: {
-// 								filterVariant: 'multi-select',
-// 							},
-// 						},
-// 					],
-// 				}}
