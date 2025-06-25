@@ -112,6 +112,20 @@ export function createDataTableDnd<TData = unknown>() {
 		)
 	}
 
+	// Custom pagination component with render prop
+	const PaginationCustom = ({
+		children,
+	}: { children: (table: Table<TData>) => React.ReactNode }) => {
+		const context = use(DataTableContext) as DataTableContextValue<TData>
+		if (!context) {
+			throw new Error(
+				'DataTable.Pagination.Custom must be used within a DataTable',
+			)
+		}
+
+		return <>{children(context.table)}</>
+	}
+
 	const DataTableComponent = ({
 		children,
 		...props
@@ -229,7 +243,9 @@ export function createDataTableDnd<TData = unknown>() {
 
 		// Check if pagination component is used
 		const paginationChildren = React.Children.toArray(children).filter(
-			(child) => React.isValidElement(child) && child.type === Pagination,
+			(child) =>
+				React.isValidElement(child) &&
+				(child.type === Pagination || child.type === PaginationCustom),
 		)
 
 		const hasPagination = paginationChildren.length > 0
@@ -334,7 +350,12 @@ export function createDataTableDnd<TData = unknown>() {
 		CreateComponent: DataTableToolbar.CreateComponent,
 	})
 	DataTableComponent.Toolbar = ToolbarWithCreateComponent
-	DataTableComponent.Pagination = Pagination
+
+	// Create a new Pagination component with Custom attached
+	const PaginationWithCustom = Object.assign(Pagination, {
+		Custom: PaginationCustom,
+	})
+	DataTableComponent.Pagination = PaginationWithCustom
 
 	return DataTableComponent
 }
