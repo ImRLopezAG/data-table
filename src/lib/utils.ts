@@ -14,6 +14,7 @@ export const dates = [
 	[getDate(2020), getDate(2025)],
 ]
 	.map(([min, max]) => {
+		if (!min || !max) return ''
 		return `${min.toISOString().split('T')[0]} to ${
 			max.toISOString().split('T')[0]
 		}`

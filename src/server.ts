@@ -1,50 +1,74 @@
-import { type Commit, fakeCommits } from '@/services/commit'
+import { commitRepository } from '@/services/commit'
 import { Hono } from 'hono'
 // import { McpIntegration } from './mcp';
 // export { McpIntegration };
 const api = new Hono<{ Bindings: CloudflareBindings }>()
-const commits = new Map<string, Commit>()
 
 api.get('/commits', (c) => {
-	const count = c.req.query('count')
-	if (commits.size === 0) {
-		for (const commit of fakeCommits(count ? Number(count) : 100)) {
-			commits.set(commit.hash, commit)
-		}
-	}
-	
-	const limit = count ? Number(count) : 100
-	const commitArray = Array.from(commits.values()).slice(0, limit)
-	return c.json({ data: commitArray })
+	const { page, pageSize } = c.req.query()
+	const commits = commitRepository.findOptimized({
+		page: Number(page) || 1,
+		pageSize: Number(pageSize) || 25,
+		orderBy: 'desc',
+	})
+
+	return c.json(commits)
 })
 
 api.get('/commits/:id', (c) => {
 	const id = c.req.param('id')
-	const commit = commits.get(id)
+	const commit = commitRepository.findById(id)
 	if (!commit) {
 		return c.notFound()
 	}
 	return c.json(commit)
 })
 
+api.get('/commits/search/', (c) => {
+	const { q, page, pageSize } = c.req.query()
+	if (!q) {
+		return c.json({
+			data: [],
+			pagination: {
+				page: 1,
+				pageSize: 25,
+				total: 0,
+				hasNext: false,
+				hasPrev: false,
+				currentPage: 1,
+			},
+		})
+	}
+	const commits = commitRepository.findMatch(
+		{
+			author: q,
+			company: q,
+			message: q,
+			hash: q
+		},
+		{
+			page: Number(page) || 1,
+			pageSize: Number(pageSize) || 25,
+			orderBy: 'desc',
+		},
+	)
+
+	return c.json(commits)
+})
 api.post('/commits', async (c) => {
 	const body = await c.req.json()
 	const commit = {
 		id: crypto.randomUUID(),
 		...body,
 	}
-	commits.set(commit.id, commit)
+	commitRepository.create(commit)
 	return c.json(commit, 201)
 })
 
 api.put('/commits/:id', async (c) => {
 	const id = c.req.param('id')
-	const commit = commits.get(id)
-	console.log({
-		message: 'Updating commit',
-		id,
-		size: commits.size,
-	})
+	const commit = commitRepository.findById(id)
+
 	if (!commit) {
 		return c.notFound()
 	}
@@ -53,17 +77,18 @@ api.put('/commits/:id', async (c) => {
 		...commit,
 		...body,
 	}
-	commits.set(id, updatedCommit)
+	console.log('Updating commit:', updatedCommit)
+	commitRepository.update(id, updatedCommit)
 	return c.json(updatedCommit)
 })
 
 api.delete('/commits/:id', (c) => {
 	const id = c.req.param('id')
-	const commit = commits.get(id)
+	const commit = commitRepository.findById(id)
 	if (!commit) {
 		return c.notFound()
 	}
-	commits.delete(id)
+	commitRepository.delete(id)
 	return c.json({ message: 'Commit deleted' })
 })
 
