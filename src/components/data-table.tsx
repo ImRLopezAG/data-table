@@ -50,6 +50,7 @@ interface DataTableProps<TData> {
 	loading?: boolean
 	pagination?: {
 		pageSize?: number
+		manualPagination?: boolean
 	}
 	classNames?: {
 		container?: string
@@ -110,6 +111,26 @@ export function createDataTable<TData = unknown>() {
 			</Suspense>
 		)
 	}
+
+	const Search = ({
+			children,
+		}: {
+			children?: React.ReactNode | ((table: Table<TData>) => React.ReactNode)
+		}) => {
+			const context = use(DataTableContext) as DataTableContextValue<TData>
+			if (!context) {
+				throw new Error('DataTable.Search must be used within a DataTable')
+			}
+	
+			// Check if children is a function, if so call it with the table
+			if (typeof children === 'function') {
+				return <>{children(context.table)}</>
+			}
+	
+			// Otherwise, render children as is
+			return <>{children}</>
+		}
+		Search.displayName = 'DataTableToolbar.Search'
 
 	// Custom pagination component with render prop
 	const PaginationCustom = ({
@@ -257,7 +278,7 @@ export function createDataTable<TData = unknown>() {
 			pagination: hasPagination
 				? {
 						enabled: true,
-						pageSize: props.pagination?.pageSize,
+						...props.pagination,
 					}
 				: { enabled: false },
 			virtualization: {
@@ -317,6 +338,7 @@ export function createDataTable<TData = unknown>() {
 	// Create a new Toolbar component with CreateComponent attached
 	const ToolbarWithCreateComponent = Object.assign(Toolbar, {
 		CreateComponent: DataTableToolbar.CreateComponent,
+		Search,
 	})
 	DataTableComponent.Toolbar = ToolbarWithCreateComponent
 
