@@ -44,6 +44,7 @@ interface DataTableProps<TData, TValue> {
 	pagination?: {
 		enabled: boolean
 		pageSize?: number
+		manualPagination?: boolean
 	}
 	virtualization?: {
 		enabled: boolean
@@ -92,10 +93,12 @@ export function useDataTable<TData, TValue>({
 		enableSorting,
 		enableFilters: enableFiltering,
 		enableHiding: enableColumnVisibility,
+		manualPagination: isPaginationEnabled && pagination?.manualPagination,
 		...(isPaginationEnabled && {
 			initialState: {
 				pagination: {
 					pageSize: pagination?.pageSize ?? 20,
+					
 				},
 			},
 		}),
