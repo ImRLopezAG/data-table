@@ -94,15 +94,23 @@ export function DraggableTable<TData>({
 								items={columnOrder}
 								strategy={horizontalListSortingStrategy}
 							>
-								{headerGroup.headers.map((header) => (
-									<DraggableTableHeader
-										key={header.id}
-										header={header}
-										className={
-											classNames?.tableHead ? classNames.tableHead(header) : ''
-										}
-									/>
-								))}
+								{columnOrder.map((columnId) => {
+									const header = headerGroup.headers.find(
+										(h) => h.column.id === columnId,
+									)
+									if (!header) return null
+									return (
+										<DraggableTableHeader
+											key={header.id}
+											header={header}
+											className={
+												classNames?.tableHead
+													? classNames.tableHead(header)
+													: ''
+											}
+										/>
+									)
+								})}
 							</SortableContext>
 						</Table.Row>
 					)}
@@ -122,15 +130,26 @@ export function DraggableTable<TData>({
 							}}
 							className={classNames?.tableRow ? classNames.tableRow(row) : ''}
 						>
-							{row.getVisibleCells().map((cell) => (
-								<DragAlongCell
-									key={cell.id}
-									cell={cell}
-									className={
-										classNames?.tableCell ? classNames.tableCell(cell) : ''
-									}
-								/>
-							))}
+							<SortableContext
+								items={columnOrder}
+								strategy={horizontalListSortingStrategy}
+							>
+								{columnOrder.map((columnId) => {
+									const cell = row
+										.getVisibleCells()
+										.find((cell) => cell.column.id === columnId)
+									if (!cell) return null
+									return (
+										<DragAlongCell
+											key={cell.id}
+											cell={cell}
+											className={
+												classNames?.tableCell ? classNames.tableCell(cell) : ''
+											}
+										/>
+									)
+								})}
+							</SortableContext>
 						</Table.Row>
 					)}
 				</Table.Body>
