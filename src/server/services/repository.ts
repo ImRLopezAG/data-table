@@ -1,9 +1,5 @@
-import type {
-	PaginatedResult,
-	SchemaRepository,
-	SelectSchemaType,
-} from '@lib/types'
-import type { z } from 'zod'
+
+import type { z } from 'zod/v4'
 
 export interface SchemaRepositoryOptions<T extends z.ZodTypeAny> {
 	defaultPageSize?: number
@@ -21,7 +17,7 @@ export interface SchemaRepositoryOptions<T extends z.ZodTypeAny> {
  *
  * This enables the pattern: createGenericController(userRepo, { schema: userSchema })
  */
-export function createSchemaRepository<
+export function createRepository<
 	E extends Record<string, z.ZodTypeAny>,
 	TSelect extends SelectSchemaType<E> = SelectSchemaType<E>,
 >(
@@ -51,8 +47,9 @@ export function createSchemaRepository<
 	// Populate with seeder data if provided
 	if (opts.seeder) {
 		for (const item of opts.seeder) {
-			const itemRecord = item
-			const id = itemRecord.id
+			// @ts-ignore
+			const { id } = item
+			
 			if (id) {
 				db.set(id, item as TSelect)
 			}

@@ -1,6 +1,17 @@
-import { faker } from '@faker-js/faker'
-import { createSchemaRepository } from '@server/repository'
-import { z } from 'zod'
+import {
+	rand,
+	randCompanyName,
+	randFullName,
+	randGitCommitMessage,
+	randGitCommitSha,
+	randNumber,
+	randPastDate,
+	randRecentDate,
+	randSoonDate,
+	randUuid,
+} from '@ngneat/falso'
+import { createRepository } from '@server/services/repository'
+import { z } from 'zod/v4'
 
 // Clean, schema-first approach - define schema once, everything is inferred
 const commitSchema = z.object({
@@ -30,23 +41,23 @@ export type CommitPaginated = {
 }
 
 // Create schema-based repository - this is the pattern we want!
-export const commitRepository = createSchemaRepository(commitSchema, {
+export const commitRepository = createRepository(commitSchema, {
 	entityName: 'Commit',
 	defaultPageSize: 25,
 	maxPageSize: Number.MAX_SAFE_INTEGER,
-	seeder: Array.from({ length: 1_000 }, () => {
-		const id = faker.string.uuid()
+	seeder: Array.from({ length: 10_000 }, () => {
+		const id = randUuid()
 		return {
 			id,
-			createdAt: faker.date.past(),
-			updatedAt: faker.date.recent(),
-			hash: faker.git.commitSha(),
-			message: faker.git.commitMessage(),
-			date: faker.date.anytime().toISOString(),
-			status: faker.helpers.arrayElement(['success', 'failed', 'pending']),
-			author: faker.person.fullName(),
-			company: faker.company.name(),
-			value: faker.number.int({ min: 0, max: 1000 }),
+			createdAt: randPastDate(),
+			updatedAt: randRecentDate(),
+			hash: randGitCommitSha(),
+			message: randGitCommitMessage(),
+			date: randSoonDate().toISOString(),
+			status: rand<Commit['status']>(['success', 'failed', 'pending']),
+			author: randFullName(),
+			company: randCompanyName(),
+			value: randNumber({ min: 0, max: 1000 }),
 		}
 	}),
 })

@@ -1,7 +1,5 @@
-import { commitRepository } from '@/services/commit'
+import { commitRepository } from '@server/services/commit'
 import { Hono } from 'hono'
-// import { McpIntegration } from './mcp';
-// export { McpIntegration };
 const api = new Hono<{ Bindings: CloudflareBindings }>()
 
 api.get('/commits', (c) => {
@@ -44,7 +42,7 @@ api.get('/commits/search/', (c) => {
 			author: q,
 			company: q,
 			message: q,
-			hash: q
+			hash: q,
 		},
 		{
 			page: Number(page) || 1,
@@ -77,7 +75,6 @@ api.put('/commits/:id', async (c) => {
 		...commit,
 		...body,
 	}
-	console.log('Updating commit:', updatedCommit)
 	commitRepository.update(id, updatedCommit)
 	return c.json(updatedCommit)
 })
@@ -93,46 +90,36 @@ api.delete('/commits/:id', (c) => {
 })
 
 api.get('/r/:name', async ({ req, env }) => {
-	const name = req.param('name')
-
-	if (!name) {
-		return new Response('Name is required', { status: 400 })
-	}
-
-	const url = new URL(req.url)
-	const assetPath = import.meta.env.PROD
-		? `assets/${name}.json`
-		: `dist/client/assets/${name}.json`
-	url.pathname = assetPath
-	const assetRequest = new Request(url)
-	const asset = await env.ASSETS.fetch(assetRequest)
-
-	if (!asset.ok) {
-		return new Response('Component not found', { status: 404 })
-	}
-	const response = await asset.text()
-	console.log('Response from asset:', response)
 	try {
-		const json = JSON.parse(response)
-		return new Response(JSON.stringify(json), {
+		const name = req.param('name')
+
+		if (!name) {
+			return new Response('Name is required', { status: 400 })
+		}
+
+		const url = new URL(req.url)
+		const assetPath = import.meta.env.PROD
+			? `assets/${name}.json`
+			: `dist/client/assets/${name}.json`
+
+		url.pathname = assetPath
+		console.log(`Fetching asset from: ${url.toString()}`)
+		const asset = await env.ASSETS.fetch(url.toString())
+
+		if (!asset.ok) {
+			return new Response('Component not found', { status: 404 })
+		}
+		const response = await asset.text()
+
+		return new Response(response, {
 			headers: {
 				'Content-Type': 'application/json',
 			},
 		})
 	} catch (error) {
-		console.error('Error parsing JSON:', error)
+		console.log(`unexpected error fetching asset:  ${req.url}`, error)
+		return new Response('Internal Server Error', { status: 500 })
 	}
-	return new Response(response, {
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	})
 })
-
-// api.mount("/mcp", McpIntegration.serve('/api/mcp').fetch, {
-// 	replaceRequest(originalRequest) {
-// 		return new Request(originalRequest)
-// 	},
-// });
 
 export default api

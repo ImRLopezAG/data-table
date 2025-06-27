@@ -38,11 +38,9 @@ export const values = [
 		label: value,
 	}))
 
-
-function getDate(year: number) {
+  function getDate(year: number) {
 	const date = new Date(year, 0, 1)
 	const start = date.getTime()
 	const end = new Date(year + 1, 0, 1).getTime()
-	const randomTime = Math.random() * (end - start) + start
-	return new Date(randomTime)
+	return new Date(performance.now() % (end - start) + start)
 }

@@ -1,13 +1,15 @@
-import { Hono } from "hono";
-import { logger } from 'hono/logger';
-import client from "./client";
-// import api, { McpIntegration } from "./server";
-import api from "./server";
-const app = new Hono();
+import server from '@/server'
+import client from '@client/renderer'
+import { Hono } from 'hono'
+import { logger } from 'hono/logger'
 
-app.use("*", logger());
-app.route("/api", api);
-app.route("/", client);
+const app = new Hono()
 
-// export { McpIntegration }
-export default app;
+app.use('*', logger())
+
+
+
+app.route('/', client)
+app.route('/api', server)
+
+export default app
