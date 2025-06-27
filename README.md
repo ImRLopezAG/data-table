@@ -19,6 +19,3 @@ Pass the `CloudflareBindings` as generics when instantiation `Hono`:
 // src/index.ts
 const app = new Hono<{ Bindings: CloudflareBindings }>()
 ```
-Inject vite/react to serve the app with `vite` server as middleware and hono as the router / server :
-
-```ts

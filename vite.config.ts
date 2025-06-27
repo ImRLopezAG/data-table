@@ -1,74 +1,70 @@
-import { cloudflare } from "@cloudflare/vite-plugin";
-import build from "@hono/vite-build/cloudflare-workers";
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
-import ssrHotReload from "vite-plugin-ssr-hot-reload";
-import viteTsConfigPaths from "vite-tsconfig-paths";
-export default defineConfig(({ command, isSsrBuild }) => {
-	const include = [
-		"react",
-		"react-dom",
-		"@tanstack/react-query",
-		"@tanstack/react-table",
-		"@dnd/kit",
-		"@dnd-kit/sortable",
-		"@dnd-kit/core",
-		"@dnd-kit/accessibility",
-		"@dnd-kit/utilities",
-		"@dnd-kit/modifiers",
-	]
-	if (command === "serve") {
-		return {
-			plugins: [
-				ssrHotReload(),
-				cloudflare(),
-				viteTsConfigPaths(),
-				react(),
-				tailwindcss(),
-			],
-			optimizeDeps: {
-				include,
-			}
-		};
-	}
-	if (!isSsrBuild) {
-		return {
-			plugins: [
-				viteTsConfigPaths(),
-				react(),
-				cloudflare(),
-				tailwindcss(),
-				build({ outputDir: "dist" })
-			],
-			build: {
-				rollupOptions: {
-					input: ["./src/style.css", "./src/main.tsx"],
-					external: ["cloudflare:workers"],
-					output: {
-						assetFileNames: "assets/[name].[ext]",
-						chunkFileNames: "assets/[name].js",
-						entryFileNames: "assets/[name].js",
-						manualChunks: {
-							main: ["./src/main.tsx"],
-						},
-					},
-				},
-			},
-		};
-	}
+import { cloudflare } from '@cloudflare/vite-plugin'
+import devServer from '@hono/vite-dev-server'
+import adapter from '@hono/vite-dev-server/cloudflare'
+import tailwindcss from '@tailwindcss/vite'
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
+import ssrPlugin from 'vite-ssr-components/plugin'
+import viteTsConfigPaths from 'vite-tsconfig-paths'
+import compiler from 'babel-plugin-react-compiler'
+const ReactCompilerConfig = {
+  target: '19' // '17' | '18' | '19'
+};
+
+export default defineConfig(({ command, mode, isSsrBuild }) => {
+	const isDev = command === 'serve' && mode === 'development'
+
 	return {
-		ssr: {
-			noExternal: true,
-		},
 		build: {
+			target: 'esnext',
 			rollupOptions: {
-				external: ["cloudflare:workers"],
+				external: isDev ? [] : ['cloudflare:workers', 'cloudflare'],
+				treeshake: !isSsrBuild,
+				input: !isSsrBuild ? './src/client/index.tsx' : undefined,
+				output: !isSsrBuild
+					? {
+							format: 'es',
+							entryFileNames: '[name].js',
+							chunkFileNames: '[name].js',
+							assetFileNames: '[name].[ext]',
+						}
+					: undefined,
 			},
+			cssMinify: !isSsrBuild ? 'lightningcss' : undefined,
+			minify: !isDev && !isSsrBuild,
+		},
+		ssr: {
+			external: ['cloudflare:workers', 'cloudflare'],
+			target: !isDev ? 'webworker' : undefined,
+			noExternal: isDev ? undefined : true,
 		},
 		optimizeDeps: {
-			include,
+			include: !isSsrBuild
+				? ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime']
+				: undefined,
+			force: isSsrBuild,
 		},
-		plugins: [build({ outputDir: "dist-server" }), viteTsConfigPaths()],
-	};
-});
+		css: !isSsrBuild
+			? {
+					transformer: 'lightningcss',
+				}
+			: undefined,
+		plugins: [
+			!isSsrBuild && react({
+				babel: {
+					plugins: [[compiler, ReactCompilerConfig]],
+				},
+			}),
+			!isSsrBuild && tailwindcss(),
+			cloudflare(),
+			viteTsConfigPaths(),
+			!isSsrBuild &&
+				isDev &&
+				devServer({
+					adapter,
+					entry: './src/index.ts',
+				}),
+			isSsrBuild && ssrPlugin(),
+		].filter(Boolean),
+	}
+})

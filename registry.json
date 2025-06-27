@@ -30,39 +30,43 @@
       ],
       "files": [
         {
-          "path": "./src/components/data-table.tsx",
+          "path": "./src/client/components/data-table/index.tsx",
           "type": "registry:block"
         },
         {
-          "path": "./src/hooks/use-data-table.ts",
+          "path": "./src/client/components/data-table/components.tsx",
+          "type": "registry:block"
+        },
+        {
+          "path": "./src/client/hooks/use-data-table.ts",
           "type": "registry:hook"
         },
         {
-          "path": "./src/components/data-table-column-header.tsx",
+          "path": "./src/client/components/data-table/data-table-column-header.tsx",
           "type": "registry:block"
         },
         {
-          "path": "./src/components/data-table-faceted-filter.tsx",  
+          "path": "./src/client/components/data-table/data-table-faceted-filter.tsx",  
           "type": "registry:block"
         },
         {
-          "path": "./src/components/data-table-pagination.tsx",
+          "path": "./src/client/components/data-table/data-table-pagination.tsx",
           "type": "registry:block"
         },
         {
-          "path": "./src/components/data-table-toolbar.tsx",
+          "path": "./src/client/components/data-table/data-table-toolbar.tsx",
           "type": "registry:block"
         },
         {
-          "path": "./src/components/data-table-view-options.tsx",
+          "path": "./src/client/components/data-table/data-table-view-options.tsx",
           "type": "registry:block"
         },
         {
-          "path": "./src/components/data-table-static.tsx",
+          "path": "./src/client/components/data-table/data-table-static.tsx",
           "type": "registry:block"
         },
         {
-          "path": "./src/components/data-table-with-columns.tsx",
+          "path": "./src/client/components/data-table/data-table-with-columns.tsx",
           "type": "registry:block"
         }
       ]
@@ -84,62 +88,12 @@
       ],
       "files": [
         {
-          "path": "./src/components/data-table-dnd.tsx",
-          "type": "registry:component",
-          "target": "./data-table/data-table-dnd.tsx"
-        }
-      ]
-    },
-    {
-      "name": "vite-hono",
-      "type": "registry:block",
-      "author": "Angel Lopez",
-      "title": "Vite Hono",
-      "description": "Vite Hono server for serve react components",
-      "dependencies": ["@vitejs/plugin-react", "vite-tsconfig-paths", "@tailwindcss/vite", "vite", "react-dom", "react"],
-      "registryDependencies": [
-        "button",
-        "input",
-        "label",
-        "select",
-        "textarea",
-        "form"
-      ],
-      "files": [
-        {
-          "path": "./src/components/registry/vite-hono/config.ts",
-          "type": "registry:file",
-          "target": "~/vite.config.ts"
+          "path": "./src/client/components/data-table/data-table-dnd.tsx",
+          "type": "registry:block"
         },
         {
-          "path": "./src/components/registry/vite-hono/index.ts",
-          "type": "registry:file",
-          "target": "./index.ts"
-        },
-        {
-          "path": "./src/components/registry/vite-hono/client.ts",
-          "type": "registry:file",
-          "target": "./client.ts"
-        },
-        {
-          "path": "./src/components/registry/vite-hono/index.ts",
-          "type": "registry:file",
-          "target": "./index.ts"
-        },
-        {
-          "path": "./src/components/registry/vite-hono/server.ts",
-          "type": "registry:file",
-          "target": "./server.ts"
-        },
-        {
-          "path": "./src/components/registry/vite-hono/main.tsx",
-          "type": "registry:file",
-          "target": "main.tsx"
-        },
-        {
-          "path": "./src/components/registry/vite-hono/app.tsx",
-          "type": "registry:file",
-          "target": "app.tsx"
+          "path": "./src/client/components/data-table/dnd-table.tsx",
+          "type": "registry:block"
         }
       ]
     },

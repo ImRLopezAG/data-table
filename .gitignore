@@ -1,5 +1,6 @@
 # prod
-dist*/
+dist/
+dist-server/
 
 # dev
 .yarn/
@@ -31,3 +32,6 @@ lerna-debug.log*
 
 # misc
 .DS_Store
+
+# Million Lint
+.million
