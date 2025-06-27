@@ -20,7 +20,6 @@ import { cn } from '@/lib/utils'
 import type { Commit } from '@/services/commit'
 
 import { useCommits } from '@/hooks/use-commits'
-import { ta } from 'date-fns/locale'
 import {
 	CalendarClock,
 	CheckCircle,
@@ -56,7 +55,6 @@ export const App = () => {
 		currentPageData,
 		hasNextPage,
 		ITEMS_PER_PAGE,
-		search,
 		handleSearch,
 	} = useCommits()
 

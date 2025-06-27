@@ -36,7 +36,6 @@ client.get('/', ({ req, ...c }) => {
 	return c.html(html, {
 		headers: {
 			'Content-Type': 'text/html',
-			'Cache-Control': 'no-store',
 		},
 	})
 })

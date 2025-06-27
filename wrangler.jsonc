@@ -17,20 +17,4 @@
     "pattern": "components.imrlopez.dev/*",
     "zone_name": "imrlopez.dev"
   },
-  // "durable_objects": {
-  //   "bindings": [
-  //     {
-  //       "class_name": "McpIntegration",
-  //       "name": "MCP_OBJECT"
-  //     }
-  //   ]
-  // },
-  // "migrations": [
-  //   {
-  //     "new_sqlite_classes": [
-  //       "McpIntegration"
-  //     ],
-  //     "tag": "v2",
-  //   },
-  // ],
 }

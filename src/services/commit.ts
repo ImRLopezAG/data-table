@@ -34,8 +34,8 @@ export const commitRepository = createSchemaRepository(commitSchema, {
 	entityName: 'Commit',
 	defaultPageSize: 25,
 	maxPageSize: Number.MAX_SAFE_INTEGER,
-	seeder: Array.from({ length: 100_000 }, () => {
-		const id = crypto.randomUUID()
+	seeder: Array.from({ length: 1_000 }, () => {
+		const id = faker.string.uuid()
 		return {
 			id,
 			createdAt: faker.date.past(),
