@@ -7,6 +7,7 @@ import { defineConfig } from 'vite'
 import ssrPlugin from 'vite-ssr-components/plugin'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 import compiler from 'babel-plugin-react-compiler'
+import Million from '@million/lint'
 const ReactCompilerConfig = {
   target: '19' // '17' | '18' | '19'
 };
@@ -52,7 +53,7 @@ export default defineConfig(({ command, mode, isSsrBuild }) => {
 		plugins: [
 			!isSsrBuild && react({
 				babel: {
-					plugins: [[compiler, ReactCompilerConfig]],
+					// plugins: [[compiler, ReactCompilerConfig]],
 				},
 			}),
 			!isSsrBuild && tailwindcss(),
