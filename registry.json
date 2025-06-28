@@ -38,6 +38,10 @@
           "type": "registry:block"
         },
         {
+          "path": "./src/client/components/data-table/build-table.tsx",
+          "type": "registry:block"
+        },
+        {
           "path": "./src/client/hooks/use-data-table.ts",
           "type": "registry:hook"
         },

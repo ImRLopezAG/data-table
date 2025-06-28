@@ -147,16 +147,14 @@ export const App = () => {
 							)}
 						</CommitTable.Toolbar.Search>
 					</CommitTable.Toolbar>
-					<CommitTable.Column accessorKey='hash' filterHeader='Hash' size={5} element={{
-						className: 'max-w-8',
-					}}>
+					<CommitTable.Column accessorKey='hash' filterHeader='Hash' maxSize={20}>
 						{({ row }) => row.original.hash.slice(0, 7)}
 					</CommitTable.Column>
 					<CommitTable.Column
 						accessorKey='message'
 						filterHeader='Message'
 						editable
-						size={250}
+						size={145}
 					>
 						{({ row }) => row.original.message}
 					</CommitTable.Column>
@@ -164,7 +162,7 @@ export const App = () => {
 						accessorKey='author'
 						filterHeader='Author'
 						editable
-						size={20}
+						maxSize={40}
 					>
 						{({ row }) => row.original.author}
 					</CommitTable.Column>
@@ -173,7 +171,8 @@ export const App = () => {
 						filterHeader='Date'
 						filterVariant='range'
 						editable
-						size={10}
+												maxSize={30}
+
 					>
 						{({ row }) => {
 							const [open, setOpen] = useState(false)
@@ -212,7 +211,8 @@ export const App = () => {
 						accessorKey='value'
 						filterHeader='Value'
 						filterVariant='range'
-						size={10}
+												maxSize={17}
+
 					>
 						{({ row }) => row.original.value}
 					</CommitTable.Column>
@@ -220,7 +220,8 @@ export const App = () => {
 						accessorKey='status'
 						header='Status'
 						filterVariant='multi-select'
-						size={20}
+												maxSize={30}
+
 					>
 						{({ row }) => {
 							const currentStatus = row.original.status
