@@ -1,4 +1,3 @@
-import { Button } from '@/client/components/ui/button'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -55,35 +54,29 @@ export function DataTableColumnHeader<TData>({
 	}, [column.getIsSorted()])
 
 	return (
-		<div className={cn('flex items-center space-x-2', className)} {...props}>
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button
-						variant='ghost'
-						size='sm'
-						className='-ml-3 h-8 data-[state=open]:bg-accent'
-					>
-						<span>{title}</span>
-						{sortIcon}
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align='start'>
-					<DropdownMenuItem onClick={handleSortAsc}>
-						<ArrowUp className='mr-2 size-3.5 text-muted-foreground/70' />
-						Asc
-					</DropdownMenuItem>
-					<DropdownMenuItem onClick={handleSortDesc}>
-						<ArrowDown className='mr-2 size-3.5 text-muted-foreground/70' />
-						Desc
-					</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem onClick={handleToggleVisibility}>
-						<EyeOff className='mr-2 size-3.5 text-muted-foreground/70' />
-						Hide
-					</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
-		</div>
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<div className='between flex h-6 w-fit cursor-pointer select-none items-center rounded px-1 font-medium text-muted-foreground text-sm hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground' {...props}>
+					<span>{title}</span>
+					{sortIcon}
+				</div>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align='start'>
+				<DropdownMenuItem onClick={handleSortAsc}>
+					<ArrowUp className='mr-2 size-3.5 text-muted-foreground/70' />
+					Asc
+				</DropdownMenuItem>
+				<DropdownMenuItem onClick={handleSortDesc}>
+					<ArrowDown className='mr-2 size-3.5 text-muted-foreground/70' />
+					Desc
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem onClick={handleToggleVisibility}>
+					<EyeOff className='mr-2 size-3.5 text-muted-foreground/70' />
+					Hide
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
 	)
 }
 

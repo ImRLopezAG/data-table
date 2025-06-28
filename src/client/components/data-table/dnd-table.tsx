@@ -20,7 +20,6 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import type { Cell, Header, Row, Table as TTable } from '@tanstack/react-table'
 import { flexRender } from '@tanstack/react-table'
-import { GripHorizontal } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import type { Virtualizer } from '@tanstack/react-virtual'
@@ -78,6 +77,11 @@ export function DraggableTable<TData>({
 		},
 		[handleDragEnd],
 	)
+
+	const draggableColumns = React.useMemo(
+		() => columnOrder.filter((id) => id !== 'select'),
+		[columnOrder],
+	)
 	return (
 		<DndContext
 			sensors={sensors}
@@ -90,7 +94,7 @@ export function DraggableTable<TData>({
 					{(headerGroup) => (
 						<Table.Row key={headerGroup.id}>
 							<SortableContext
-								items={columnOrder}
+								items={draggableColumns}
 								strategy={horizontalListSortingStrategy}
 							>
 								{columnOrder.map((columnId) => {
@@ -98,10 +102,11 @@ export function DraggableTable<TData>({
 										(h) => h.column.id === columnId,
 									)
 									if (!header) return null
+
 									return (
 										<DraggableTableHeader
-											key={header.id}
 											header={header}
+											key={header.id}
 											className={
 												classNames?.tableHead
 													? classNames.tableHead(header)
@@ -120,39 +125,41 @@ export function DraggableTable<TData>({
 					emptyState={emptyState}
 				>
 					{(row, virtualRow, index) => {
-
 						return (
-						<Table.Row
-							key={row.id}
-							row={row}
-							style={{
-								height: `${virtualRow.size}px`,
-								transform: `translateY(${virtualRow.start - index * virtualRow.size}px)`,
-							}}
-							className={classNames?.tableRow ? classNames.tableRow(row) : ''}
-						>
-							<SortableContext
-								items={columnOrder}
-								strategy={horizontalListSortingStrategy}
+							<Table.Row
+								key={row.id}
+								row={row}
+								style={{
+									height: `${virtualRow.size}px`,
+									transform: `translateY(${virtualRow.start - index * virtualRow.size}px)`,
+								}}
+								className={classNames?.tableRow ? classNames.tableRow(row) : ''}
 							>
-								{columnOrder.map((columnId) => {
-									const cell = row
-										.getVisibleCells()
-										.find((cell) => cell.column.id === columnId)
-									if (!cell) return null
-									return (
-										<DragAlongCell
-											key={cell.id}
-											cell={cell}
-											className={
-												classNames?.tableCell ? classNames.tableCell(cell) : ''
-											}
-										/>
-									)
-								})}
-							</SortableContext>
-						</Table.Row>
-					)
+								{' '}
+								<SortableContext
+									items={draggableColumns}
+									strategy={horizontalListSortingStrategy}
+								>
+									{columnOrder.map((columnId) => {
+										const cell = row
+											.getVisibleCells()
+											.find((cell) => cell.column.id === columnId)
+										if (!cell) return null
+										return (
+											<DragAlongCell
+												key={cell.id}
+												cell={cell}
+												className={
+													classNames?.tableCell
+														? classNames.tableCell(cell)
+														: ''
+												}
+											/>
+										)
+									})}
+								</SortableContext>
+							</Table.Row>
+						)
 					}}
 				</Table.Body>
 			</Table>
@@ -167,17 +174,25 @@ function DraggableTableHeader<TData, TValue>({
 	header: Header<TData, TValue>
 	className?: string
 }) {
+	const isSelectColumn = header.id === 'select'
+
 	const { attributes, isDragging, listeners, setNodeRef, transform } =
 		useSortable({
 			id: header.column.id,
+			disabled: isSelectColumn, // Disable dragging for select column
 		})
 
+	// Apply column sizing from TanStack Table
+	const columnSize = header.getSize()
 	const style: CSSProperties = {
 		opacity: isDragging ? 0.8 : 1,
 		transform: CSS.Translate.toString(transform),
 		transition: 'width transform 0.2s ease-in-out',
 		whiteSpace: 'nowrap',
 		zIndex: isDragging ? 1 : 0,
+		width: `${columnSize}px`,
+		minWidth: `${columnSize}px`,
+		maxWidth: `${columnSize}px`,
 	}
 
 	return (
@@ -187,22 +202,26 @@ function DraggableTableHeader<TData, TValue>({
 			header={header}
 			className={cn(
 				className,
+				!isSelectColumn &&
+					'dnd-handle pointer-events-auto cursor-grab active:cursor-grabbing',
 				'relative [&:has([role=checkbox])]:max-w-8 [&:has([role=checkbox])]:pl-1',
 			)}
 			colSpan={header.colSpan}
+			{...(!isSelectColumn && {
+				...attributes,
+				...listeners,
+			})}
 		>
-			<div className='flex items-center justify-between'>
+			<div
+				className={cn(
+					'flex items-center justify-between',
+					!isSelectColumn &&
+						'dnd-handle pointer-events-auto cursor-grab active:cursor-grabbing',
+				)}
+			>
 				{header.isPlaceholder
 					? null
 					: flexRender(header.column.columnDef.header, header.getContext())}
-				<div
-					{...attributes}
-					{...listeners}
-					className='dnd-handle pointer-events-auto cursor-grab active:cursor-grabbing'
-				>
-					<GripHorizontal className='size-4' />
-					<span className='sr-only'>Drag to reorder</span>
-				</div>
 			</div>
 		</Table.Head>
 	)
@@ -215,22 +234,30 @@ function DragAlongCell<TData, TValue>({
 	cell: Cell<TData, TValue>
 	className?: string
 }) {
+	const isSelectColumn = cell.column.id === 'select'
+
 	const { isDragging, setNodeRef, transform } = useSortable({
 		id: cell.column.id,
+		disabled: isSelectColumn, // Disable dragging for select column
 	})
 
+	// Apply column sizing from TanStack Table
+	const columnSize = cell.column.getSize()
 	const style: CSSProperties = React.useMemo(() => {
 		return {
-		opacity: isDragging ? 0.8 : 1,
-		transform: CSS.Translate.toString(transform),
-		transition: 'width transform 0.2s ease-in-out',
-		border: '1px solid transparent',
-		whiteSpace: 'nowrap',
-		overflow: 'hidden',
-		textOverflow: 'ellipsis',
-		zIndex: isDragging ? 1 : 0
-	}
-	}, [isDragging, transform])
+			opacity: isDragging ? 0.8 : 1,
+			transform: CSS.Translate.toString(transform),
+			transition: 'width transform 0.2s ease-in-out',
+			border: '1px solid transparent',
+			whiteSpace: 'nowrap',
+			overflow: 'hidden',
+			textOverflow: 'ellipsis',
+			zIndex: isDragging ? 1 : 0,
+			width: columnSize === 150 ? undefined : `${columnSize}px`, // 150 is default, use auto for default
+			minWidth: `${columnSize}px`,
+			maxWidth: `${columnSize}px`,
+		}
+	}, [isDragging, transform, columnSize])
 
 	return (
 		<Table.Cell

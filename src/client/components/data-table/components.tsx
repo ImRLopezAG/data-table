@@ -76,6 +76,7 @@ export function Table<TData>({
 			<BaseTable
 				className={cn(
 					'w-full caption-bottom text-sm',
+					'table-fixed', // Force fixed table layout for consistent column sizing
 					classNames?.table,
 					className,
 				)}
@@ -210,11 +211,23 @@ function TableHead<TData>({
 	...props
 }: TableHeadProps<TData>) {
 	const { classNames } = useTableContext<TData>()
+
+	// Apply column sizing from TanStack Table
+	const columnSize = header.getSize()
+	const style = {
+		width: `${columnSize}px`, // 150 is default, use auto for default
+		minWidth: `${columnSize}px`,
+		maxWidth: `${columnSize}px`,
+		...props.style,
+	}
+
 	return (
 		<BaseTableHead
 			ref={ref}
+			style={style}
 			className={cn(
-				'[&:has([role=checkbox])]:pl-1',
+				'px-0 [&:has([role=checkbox])]:pl-1',
+				'overflow-hidden text-ellipsis whitespace-nowrap', // Prevent content from overflowing
 				header && classNames?.tableHead ? classNames.tableHead(header) : '',
 				className,
 			)}
@@ -242,13 +255,25 @@ function TableCell<TData>({
 	colSpan,
 	ref,
 	...props
-}: TableCellProps<TData> ) {
+}: TableCellProps<TData>) {
 	const { classNames } = useTableContext<TData>()
+
+	// Apply column sizing from TanStack Table
+	const columnSize = cell.column.getSize()
+	const style = {
+		width: `${columnSize}px`, // 150 is default, use auto for default
+		minWidth: `${columnSize}px`,
+		maxWidth: `${columnSize}px`,
+		...props.style,
+	}
+
 	return (
 		<BaseTableCell
 			ref={ref}
+			style={style}
 			className={cn(
 				'px-1 py-0',
+				'overflow-hidden text-ellipsis whitespace-nowrap', // Prevent content from overflowing
 				cell && classNames?.tableCell ? classNames.tableCell(cell) : '',
 				className,
 			)}
@@ -275,10 +300,7 @@ function LoadingRows<TData>({ count = 5 }: LoadingRowsProps) {
 			{Array.from({ length: count }).map((_, index) => (
 				<TableRow key={`skeleton-${index}`}>
 					{table.getHeaderGroups()[0]?.headers.map((header) => (
-						<BaseTableCell
-							key={header.id}
-							className='p-1 align-baseline'
-						>
+						<BaseTableCell key={header.id} className='p-1 align-baseline'>
 							<Skeleton className='h-4 w-full' />
 						</BaseTableCell>
 					))}

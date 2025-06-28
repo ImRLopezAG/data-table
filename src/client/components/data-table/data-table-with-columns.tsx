@@ -31,7 +31,12 @@ export function withColumns<TData>({
 		const enhancedColumn: ColumnDef<TData> = {
 			...column,
 			id,
-			maxSize: column.size,
+			// Apply column sizing properly
+			...(column.size && {
+				size: column.size,
+				minSize: column.minSize || column.size,
+				maxSize: column.maxSize || column.size,
+			}),
 			...(column.meta?.filterHeader && {
 				header: ({ column: headerColumn }) => (
 					<DataTableColumnHeader
@@ -122,7 +127,7 @@ export function withColumns<TData>({
 function selectionColumn<TData>(): ColumnDef<TData> {
 	return {
 		id: 'select',
-		size: 10,
+		size: 5,
 		header: ({ table }) => {
 			const checked = table.getIsAllPageRowsSelected()
 			const onCheckedChange = React.useCallback(

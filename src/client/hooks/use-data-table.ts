@@ -1,6 +1,7 @@
 import {
 	type ColumnDef,
 	type ColumnFiltersState,
+	type ColumnSizingState,
 	type RowSelectionState,
 	type SortingState,
 	type VisibilityState,
@@ -35,6 +36,7 @@ interface TableState {
 	columnVisibility: VisibilityState
 	rowSelection: RowSelectionState
 	columnOrder: string[]
+	columnSizing: ColumnSizingState
 }
 
 interface DataTableProps<TData, TValue> {
@@ -81,6 +83,7 @@ export function useDataTable<TData, TValue>({
 		columnVisibility: {},
 		rowSelection: {},
 		columnOrder: initialColumnOrder,
+		columnSizing: {},
 	})
 
 	// Create table instance with memoized config
@@ -93,6 +96,8 @@ export function useDataTable<TData, TValue>({
 		enableSorting,
 		enableFilters: enableFiltering,
 		enableHiding: enableColumnVisibility,
+		enableColumnResizing: true, // Enable column resizing
+		columnResizeMode: 'onChange', // Update on change
 		manualPagination: isPaginationEnabled && pagination?.manualPagination,
 		...(isPaginationEnabled && {
 			initialState: {
@@ -162,6 +167,14 @@ export function useDataTable<TData, TValue>({
 				dispatch({ type: 'SET_COLUMN_ORDER', payload: newValue })
 			},
 			[state.columnOrder],
+		),
+		onColumnSizingChange: React.useCallback(
+			(updater: React.SetStateAction<ColumnSizingState>) => {
+				const newValue =
+					typeof updater === 'function' ? updater(state.columnSizing) : updater
+				dispatch({ type: 'SET_COLUMN_SIZING', payload: newValue })
+			},
+			[state.columnSizing],
 		),
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: enableFiltering ? getFilteredRowModel() : undefined,
@@ -267,6 +280,7 @@ type TableStateAction =
 	| { type: 'SET_COLUMN_VISIBILITY'; payload: VisibilityState }
 	| { type: 'SET_ROW_SELECTION'; payload: RowSelectionState }
 	| { type: 'SET_COLUMN_ORDER'; payload: string[] }
+	| { type: 'SET_COLUMN_SIZING'; payload: ColumnSizingState }
 	| { type: 'RESET_STATE' }
 
 // Table state reducer for better state management
@@ -285,6 +299,8 @@ function tableStateReducer(
 			return { ...state, rowSelection: action.payload }
 		case 'SET_COLUMN_ORDER':
 			return { ...state, columnOrder: action.payload }
+		case 'SET_COLUMN_SIZING':
+			return { ...state, columnSizing: action.payload }
 		case 'RESET_STATE':
 			return {
 				sorting: [],
@@ -292,6 +308,7 @@ function tableStateReducer(
 				columnVisibility: {},
 				rowSelection: {},
 				columnOrder: [],
+				columnSizing: {},
 			}
 		default:
 			return state
