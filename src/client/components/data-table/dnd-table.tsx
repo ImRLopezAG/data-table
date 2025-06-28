@@ -24,7 +24,7 @@ import { GripHorizontal } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import type { Virtualizer } from '@tanstack/react-virtual'
-import { useCallback } from 'react'
+import React from 'react'
 import { Table } from './components'
 
 export interface DraggableTableProps<TData> {
@@ -69,7 +69,7 @@ export function DraggableTable<TData>({
 		useSensor(KeyboardSensor),
 	)
 
-	const onHandleDragEnd = useCallback(
+	const onHandleDragEnd = React.useCallback(
 		(event: DragEndEvent) => {
 			const { active, over } = event
 			if (active && over && active.id !== over.id) {
@@ -85,7 +85,6 @@ export function DraggableTable<TData>({
 			modifiers={[restrictToHorizontalAxis]}
 			onDragEnd={onHandleDragEnd}
 		>
-			{' '}
 			<Table<TData> classNames={classNames} table={table}>
 				<Table.Header<TData>>
 					{(headerGroup) => (
@@ -120,7 +119,9 @@ export function DraggableTable<TData>({
 					loading={loading}
 					emptyState={emptyState}
 				>
-					{(row, virtualRow, index) => (
+					{(row, virtualRow, index) => {
+
+						return (
 						<Table.Row
 							key={row.id}
 							row={row}
@@ -151,7 +152,8 @@ export function DraggableTable<TData>({
 								})}
 							</SortableContext>
 						</Table.Row>
-					)}
+					)
+					}}
 				</Table.Body>
 			</Table>
 		</DndContext>
@@ -182,6 +184,7 @@ function DraggableTableHeader<TData, TValue>({
 		<Table.Head
 			ref={setNodeRef}
 			style={style}
+			header={header}
 			className={cn(
 				className,
 				'relative [&:has([role=checkbox])]:max-w-8 [&:has([role=checkbox])]:pl-1',
@@ -216,18 +219,25 @@ function DragAlongCell<TData, TValue>({
 		id: cell.column.id,
 	})
 
-	const style: CSSProperties = {
+	const style: CSSProperties = React.useMemo(() => {
+		return {
 		opacity: isDragging ? 0.8 : 1,
 		transform: CSS.Translate.toString(transform),
 		transition: 'width transform 0.2s ease-in-out',
-		zIndex: isDragging ? 1 : 0,
+		border: '1px solid transparent',
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		zIndex: isDragging ? 1 : 0
 	}
+	}, [isDragging, transform])
 
 	return (
 		<Table.Cell
 			ref={setNodeRef}
 			style={style}
 			className={cn('px-1 py-0', className)}
+			cell={cell}
 		>
 			{flexRender(cell.column.columnDef.cell, cell.getContext())}
 		</Table.Cell>

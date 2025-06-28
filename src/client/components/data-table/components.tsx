@@ -142,16 +142,7 @@ function TableBody<TData>({
 	const { classNames, table } = useTableContext<TData>()
 	const rows = table.getRowModel().rows
 	const columns = table.getAllColumns()
-	if (!rows.length && !loading) {
-		return (
-			<BaseTableBody
-				className={cn(classNames?.tableBody, className)}
-				{...props}
-			>
-				{emptyState}
-			</BaseTableBody>
-		)
-	}
+
 	return (
 		<BaseTableBody className={cn(classNames?.tableBody, className)} {...props}>
 			{loading ? (
@@ -205,7 +196,7 @@ function TableRow<TData>({
 interface TableHeadProps<TData>
 	extends React.HTMLAttributes<HTMLTableCellElement> {
 	children?: React.ReactNode
-	header?: Header<TData, unknown>
+	header: Header<TData, unknown>
 	colSpan?: number
 	ref?: React.Ref<HTMLTableCellElement>
 }
@@ -219,7 +210,6 @@ function TableHead<TData>({
 	...props
 }: TableHeadProps<TData>) {
 	const { classNames } = useTableContext<TData>()
-
 	return (
 		<BaseTableHead
 			ref={ref}
@@ -240,7 +230,7 @@ function TableHead<TData>({
 interface TableCellProps<TData>
 	extends React.HTMLAttributes<HTMLTableCellElement> {
 	children?: React.ReactNode
-	cell?: Cell<TData, unknown>
+	cell: Cell<TData, unknown>
 	colSpan?: number
 	ref?: React.Ref<HTMLTableCellElement>
 }
@@ -252,9 +242,8 @@ function TableCell<TData>({
 	colSpan,
 	ref,
 	...props
-}: TableCellProps<TData>) {
+}: TableCellProps<TData> ) {
 	const { classNames } = useTableContext<TData>()
-
 	return (
 		<BaseTableCell
 			ref={ref}
@@ -286,9 +275,12 @@ function LoadingRows<TData>({ count = 5 }: LoadingRowsProps) {
 			{Array.from({ length: count }).map((_, index) => (
 				<TableRow key={`skeleton-${index}`}>
 					{table.getHeaderGroups()[0]?.headers.map((header) => (
-						<TableCell key={header.id} className='p-1 align-baseline'>
+						<BaseTableCell
+							key={header.id}
+							className='p-1 align-baseline'
+						>
 							<Skeleton className='h-4 w-full' />
-						</TableCell>
+						</BaseTableCell>
 					))}
 				</TableRow>
 			))}
@@ -305,9 +297,9 @@ interface EmptyStateProps {
 function EmptyState({ colSpan, children }: EmptyStateProps) {
 	return (
 		<TableRow>
-			<TableCell colSpan={colSpan} className='h-24 p-1 text-center'>
+			<BaseTableCell colSpan={colSpan} className='h-24 p-1 text-center'>
 				{children ?? 'No data available'}
-			</TableCell>
+			</BaseTableCell>
 		</TableRow>
 	)
 }

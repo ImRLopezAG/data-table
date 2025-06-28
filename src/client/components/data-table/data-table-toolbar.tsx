@@ -65,7 +65,6 @@ export function DataTableToolbar<TData>({
 		>
 			{' '}
 			<div className='flex flex-1 items-center space-x-2'>
-				{/* Render custom search component if provided, otherwise use default filter */}
 				{searchComponent.length > 0
 					? searchComponent.map((component, index) => {
 							if (React.isValidElement(component)) {

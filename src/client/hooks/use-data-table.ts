@@ -98,7 +98,6 @@ export function useDataTable<TData, TValue>({
 			initialState: {
 				pagination: {
 					pageSize: pagination?.pageSize ?? 20,
-					
 				},
 			},
 		}),

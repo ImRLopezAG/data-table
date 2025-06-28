@@ -21,6 +21,7 @@ export function DataTableColumnHeader<TData>({
 	column,
 	title,
 	className,
+	...props
 }: DataTableColumnHeaderProps<TData>) {
 	// Memoize callback functions to prevent unnecessary re-renders
 	const handleSortAsc = React.useCallback(() => {
@@ -54,7 +55,7 @@ export function DataTableColumnHeader<TData>({
 	}, [column.getIsSorted()])
 
 	return (
-		<div className={cn('flex items-center space-x-2', className)}>
+		<div className={cn('flex items-center space-x-2', className)} {...props}>
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<Button
