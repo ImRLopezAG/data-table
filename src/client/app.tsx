@@ -1,13 +1,9 @@
-import { createDataTableDnd } from '@components/data-table/data-table-dnd'
+import { createDataTable } from '@components/data-table/data-table-dnd'
 import { Button } from '@components/ui/button'
 import { Calendar } from '@components/ui/calendar'
 import { Checkbox } from '@components/ui/checkbox'
 import { Label } from '@components/ui/label'
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 import {
 	ChevronLeft,
 	ChevronRight,
@@ -20,6 +16,7 @@ import { cn } from '@/lib/utils'
 import type { Commit } from '@server/services/commit'
 
 import { useCommits } from '@hooks/use-commits'
+import { dates, values } from '@lib/utils'
 import {
 	CalendarClock,
 	CheckCircle,
@@ -28,9 +25,8 @@ import {
 	Loader2,
 	XCircle,
 } from 'lucide-react'
-import { dates, values } from '@lib/utils'
 
-const CommitTable = createDataTableDnd<Commit>()
+const CommitTable = createDataTable<Commit>()
 
 export const App = () => {
 	const {
@@ -104,7 +100,7 @@ export const App = () => {
 							const status = row.original.status
 							return cn({
 								'rounded-3xl': true,
-								'text-red-500/80': status === 'failed',
+								'text-red-400/80': status === 'failed',
 								'text-green-500/80': status === 'success',
 								'text-yellow-500/80': status === 'pending',
 							})
@@ -151,13 +147,16 @@ export const App = () => {
 							)}
 						</CommitTable.Toolbar.Search>
 					</CommitTable.Toolbar>
-					<CommitTable.Column accessorKey='hash' filterHeader='Hash'>
+					<CommitTable.Column accessorKey='hash' filterHeader='Hash' size={5} element={{
+						className: 'max-w-8',
+					}}>
 						{({ row }) => row.original.hash.slice(0, 7)}
 					</CommitTable.Column>
 					<CommitTable.Column
 						accessorKey='message'
 						filterHeader='Message'
 						editable
+						size={250}
 					>
 						{({ row }) => row.original.message}
 					</CommitTable.Column>
@@ -165,6 +164,7 @@ export const App = () => {
 						accessorKey='author'
 						filterHeader='Author'
 						editable
+						size={20}
 					>
 						{({ row }) => row.original.author}
 					</CommitTable.Column>
@@ -173,6 +173,7 @@ export const App = () => {
 						filterHeader='Date'
 						filterVariant='range'
 						editable
+						size={10}
 					>
 						{({ row }) => {
 							const [open, setOpen] = useState(false)
@@ -211,6 +212,7 @@ export const App = () => {
 						accessorKey='value'
 						filterHeader='Value'
 						filterVariant='range'
+						size={10}
 					>
 						{({ row }) => row.original.value}
 					</CommitTable.Column>
@@ -218,6 +220,7 @@ export const App = () => {
 						accessorKey='status'
 						header='Status'
 						filterVariant='multi-select'
+						size={20}
 					>
 						{({ row }) => {
 							const currentStatus = row.original.status

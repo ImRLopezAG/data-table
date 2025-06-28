@@ -9,9 +9,7 @@ client.get(
 	reactRenderer(
 		({ title }) => {
 			const isDev = import.meta.env.DEV
-			console.log(
-				`Rendering page with title: ${title} in ${isDev ? 'development' : 'production'} mode`,
-			)
+
 			return (
 				<html lang='en' suppressHydrationWarning>
 					<head>

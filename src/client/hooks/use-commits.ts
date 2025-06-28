@@ -161,7 +161,14 @@ const apiClient = {
 			{ signal },
 		)
 		if (error) {
+			// Don't log or show toast for abort errors - they're intentional cancellations
+			if (error.name === 'AbortError' || signal?.aborted) {
+				throw error // Re-throw abort errors so React Query can handle them properly
+			}
 			console.error('Failed to fetch commits:', error)
+			toast.error('Failed to fetch commits', {
+				description: error.message || 'There was an error fetching commits.',
+			})
 			return EMPTY_PAGINATION_RESPONSE
 		}
 		return data
@@ -176,7 +183,15 @@ const apiClient = {
 			{ signal },
 		)
 		if (error) {
+			// Don't log or show toast for abort errors - they're intentional cancellations
+			if (error.name === 'AbortError' || signal?.aborted) {
+				throw error // Re-throw abort errors so React Query can handle them properly
+			}
 			console.error('Failed to search commits:', error)
+			toast.error('Failed to search commits', {
+				description:
+					error.message || 'There was an error searching for commits.',
+			})
 			return EMPTY_PAGINATION_RESPONSE
 		}
 		return data
@@ -192,7 +207,14 @@ const apiClient = {
 			signal,
 		})
 		if (error) {
+			// Don't log or show toast for abort errors - they're intentional cancellations
+			if (error.name === 'AbortError' || signal?.aborted) {
+				throw error // Re-throw abort errors so React Query can handle them properly
+			}
 			console.error('Failed to update commit:', error)
+			toast.error('Failed to update commit', {
+				description: error.message || 'There was an error updating the commit.',
+			})
 			throw new Error(`Failed to update commit: ${error.message}`)
 		}
 		return data
@@ -357,7 +379,14 @@ export function useCommits() {
 				const pageData = await apiClient.fetchCommits(pageNumber)
 				cacheUpdater.addPage(pageData, pageNumber)
 			} catch (error) {
-				console.error(`Failed to fetch page ${pageNumber}:`, error)
+				// Don't log abort errors as they're intentional cancellations
+				if (error instanceof Error && error.name !== 'AbortError') {
+					toast.error('Failed to fetch page', {
+						description:
+							error.message || 'There was an error fetching the page.',
+					})
+					console.error(`Failed to fetch page ${pageNumber}:`, error)
+				}
 				throw error
 			}
 		},
@@ -388,7 +417,10 @@ export function useCommits() {
 							dispatch(paginationActions.setPage(pageInfo.pageIndex))
 					}
 				} catch (error) {
-					console.error(`Navigation to ${direction} failed:`, error)
+					// Don't log abort errors as they're intentional cancellations
+					if (error instanceof Error && error.name !== 'AbortError') {
+						console.error(`Navigation to ${direction} failed:`, error)
+					}
 				}
 			}
 		},

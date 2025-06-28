@@ -103,7 +103,6 @@ api.get('/r/:name', async ({ req, env }) => {
 			: `dist/client/assets/${name}.json`
 
 		url.pathname = assetPath
-		console.log(`Fetching asset from: ${url.toString()}`)
 		const asset = await env.ASSETS.fetch(url.toString())
 
 		if (!asset.ok) {
@@ -117,7 +116,6 @@ api.get('/r/:name', async ({ req, env }) => {
 			},
 		})
 	} catch (error) {
-		console.log(`unexpected error fetching asset:  ${req.url}`, error)
 		return new Response('Internal Server Error', { status: 500 })
 	}
 })
