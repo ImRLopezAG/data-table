@@ -7,9 +7,8 @@ const app = new Hono()
 
 app.use('*', logger())
 
-
+app.route('/api', server)
 
 app.route('/', client)
-app.route('/api', server)
 
 export default app

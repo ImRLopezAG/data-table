@@ -6,11 +6,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import ssrPlugin from 'vite-ssr-components/plugin'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
-import compiler from 'babel-plugin-react-compiler'
-import Million from '@million/lint'
-const ReactCompilerConfig = {
-  target: '19' // '17' | '18' | '19'
-};
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 
 export default defineConfig(({ command, mode, isSsrBuild }) => {
 	const isDev = command === 'serve' && mode === 'development'
@@ -51,7 +47,12 @@ export default defineConfig(({ command, mode, isSsrBuild }) => {
 				}
 			: undefined,
 		plugins: [
-			!isSsrBuild && react({
+			tanstackRouter({
+				target: 'react',
+				autoCodeSplitting: true,
+				routesDirectory: './src/client/app/',
+			}),
+			react({
 				babel: {
 					// plugins: [[compiler, ReactCompilerConfig]],
 				},
