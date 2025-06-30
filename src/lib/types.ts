@@ -5,7 +5,17 @@ declare module '@hono/react-renderer' {
 	}
 }
 
+interface RepositoryMethodsHooks<T> {
+	onCompleteBeforeReturn?: (data: T) => void
+	onError?: (error: Error) => void
+}
+
 declare global {
+
+	interface Props {
+		children?: React.ReactNode
+		className?: string
+	}
 	interface Pagination {
 		page: number
 		pageSize: number
@@ -37,13 +47,14 @@ declare global {
 	export type TInsert<
 		T extends Record<string, z.ZodTypeAny>,
 		TSelect extends SelectSchemaType<T> = SelectSchemaType<T>,
-	> = Omit<TSelect, 'id' | 'createdAt' | 'updatedAt'>
+		Entity extends z.infer<TSelect> = z.infer<TSelect>,
+	> = Omit<Entity, 'id' | 'createdAt' | 'updatedAt'>
 
 	export type TUpdate<
 		T extends Record<string, z.ZodTypeAny>,
 		TSelect extends SelectSchemaType<T> = SelectSchemaType<T>,
-	> = Partial<Omit<TSelect, 'id' | 'createdAt' | 'updatedAt'>>
-
+		Entity extends z.infer<TSelect> = z.infer<TSelect>,
+	> = Partial<Omit<Entity, 'id' | 'createdAt' | 'updatedAt'>>
 	export interface SchemaRepository<
 		T extends Record<string, z.ZodTypeAny>,
 		TSelect extends SelectSchemaType<T> = SelectSchemaType<T>,
@@ -52,9 +63,9 @@ declare global {
 		// Core CRUD operations
 		findAll: (opts?: PaginationOptions) => Entity[]
 		findById: (id: string) => Entity | null
-		create: (data: TInsert<T>) => [Error, null] | [null, Entity]
-		update: (id: string, data: TUpdate<T>) => [Error, null] | [null, Entity]
-		delete: (id: string) => { success: boolean; message?: string }
+		create: (data: TInsert<T>, hooks?: RepositoryMethodsHooks<Entity>) => [Error, null] | [null, Entity]
+		update: (id: string, data: TUpdate<T>, hooks?: RepositoryMethodsHooks<Entity>) => [Error, null] | [null, Entity]
+		delete: (id: string, hooks?: RepositoryMethodsHooks<Entity>) => { success: boolean; message?: string }
 
 		// Query operations
 		findBy: (
@@ -74,8 +85,31 @@ declare global {
 		// Advanced operations
 		findOptimized: (options?: PaginationOptions) => PaginatedResult<Entity>
 
+		withCursor: (
+			cursor: Date | null,
+			options?: PaginationOptions,
+		) => {
+			items: Entity[]
+			nextCursor: Date | null
+		}
+		findByWithCursor: (
+			criteria: Partial<Entity>,
+			cursor: Date | null,
+			options?: PaginationOptions,
+		) => {
+			items: Entity[]
+			nextCursor: Date | null
+		}
+		findMatchWithCursor: (
+			criteria: Partial<Entity>,
+			cursor: Date | null,
+			options?: PaginationOptions,
+		) => {
+			items: Entity[]
+			nextCursor: Date | null
+		}
 		// Access to underlying storage and metadata
-		db: Map<string, TSelect>
+		db: Map<string, z.infer<TSelect>>
 		entityName: string
 	}
 }

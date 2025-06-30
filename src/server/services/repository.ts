@@ -42,7 +42,7 @@ export function createRepository<
 		.omit({ id: true, createdAt: true, updatedAt: true })
 
 	// In-memory storage
-	const db = new Map<string, TSelect>()
+	const db = new Map()
 
 	// Populate with seeder data if provided
 	if (opts.seeder) {
@@ -51,7 +51,7 @@ export function createRepository<
 			const { id } = item
 			
 			if (id) {
-				db.set(id, item as TSelect)
+				db.set(id, item)
 			}
 		}
 	}
@@ -79,7 +79,7 @@ export function createRepository<
 		}
 	}
 
-	const repository: SchemaRepository<E, TSelect> = {
+	const repository: SchemaRepository<E, TSelect, z.infer<TSelect>> = {
 		findAll: (opts = {}) => {
 			const { page = 1, pageSize = defaultPageSize, orderBy = 'desc' } = opts
 			const results = Array.from(db.values())
@@ -105,10 +105,10 @@ export function createRepository<
 			// Pagination
 			const actualPageSize = Math.min(pageSize, maxPageSize)
 			const startIndex = Math.max(0, page - 1) * actualPageSize
-
-			return schema
+			const data = schema
 				.array()
 				.parse(results.slice(startIndex, startIndex + actualPageSize))
+			return data
 		},
 
 		findById: (id: string) => {
@@ -118,7 +118,7 @@ export function createRepository<
 			return results
 		},
 
-		create: (data) => {
+		create: (data, hooks) => {
 			try {
 				// Validate insert data
 				const validatedData = insertSchema.parse(data)
@@ -140,9 +140,15 @@ export function createRepository<
 
 				// Store
 				db.set(id, newRecord)
+				if (hooks?.onCompleteBeforeReturn) {
+					hooks.onCompleteBeforeReturn(result)
+				}
 
 				return [null, result]
 			} catch (error) {
+				if (hooks?.onError) {
+					hooks.onError(error instanceof Error ? error : new Error(String(error)))
+				}
 				return [
 					error instanceof Error ? error : new Error(String(error)),
 					null,
@@ -150,7 +156,7 @@ export function createRepository<
 			}
 		},
 
-		update: (id: string, data) => {
+		update: (id: string, data, hooks) => {
 			try {
 				const existing = db.get(id)
 				if (!existing) {
@@ -175,9 +181,14 @@ export function createRepository<
 
 				// Store
 				db.set(id, updatedRecord)
-
+				if (hooks?.onCompleteBeforeReturn) {
+					hooks.onCompleteBeforeReturn(result)
+				}
 				return [null, result]
 			} catch (error) {
+				if (hooks?.onError) {
+					hooks.onError(error instanceof Error ? error : new Error(String(error)))
+				}
 				return [
 					error instanceof Error ? error : new Error(String(error)),
 					null,
@@ -185,7 +196,7 @@ export function createRepository<
 			}
 		},
 
-		delete: (id: string) => {
+		delete: (id: string, hooks?) => {
 			try {
 				const existing = db.get(id)
 				if (!existing) {
@@ -212,9 +223,15 @@ export function createRepository<
 					// Hard delete
 					db.delete(id)
 				}
-
+				
+				if (hooks?.onCompleteBeforeReturn) {
+					hooks.onCompleteBeforeReturn(schema.parse(existing))
+				}
 				return { success: true }
 			} catch (error) {
+				if (hooks?.onError) {
+					hooks.onError(error instanceof Error ? error : new Error(String(error)))
+				}
 				return { success: false, message: String(error) }
 			}
 		},
@@ -302,7 +319,77 @@ export function createRepository<
 				},
 			}
 		},
-
+		withCursor: (cursor, options = {}) => {
+			const { page = 1, pageSize = defaultPageSize } = options
+			const actualPageSize = Math.min(pageSize, maxPageSize)
+			const results = Array.from(db.values()).filter((item) => {
+				const itemRecord = item as Record<string, unknown>
+				const itemDate = itemRecord.createdAt as Date
+				return !cursor || itemDate > cursor
+			})
+			const startIndex = (page - 1) * actualPageSize
+			const paginatedData = results.slice(startIndex, startIndex + actualPageSize)
+			const nextCursor = paginatedData.length > 0
+				? (paginatedData[paginatedData.length - 1] as Record<string, unknown>).createdAt as Date
+				: null	
+			const data = schema.array().parse(paginatedData)
+			return {
+				items: data,
+				nextCursor,
+			}
+		},
+		findByWithCursor: (criteria, cursor, options = {}) => {
+			const { page = 1, pageSize = defaultPageSize } = options
+			const actualPageSize = Math.min(pageSize, maxPageSize)
+			const results = Array.from(db.values()).filter((item) => {
+				const itemRecord = item as Record<string, unknown>
+				const itemDate = itemRecord.createdAt as Date
+				return (!cursor || itemDate > cursor) &&
+					Object.entries(criteria).every(([key, value]) => {
+						const itemValue = itemRecord[key]
+						if (typeof itemValue === 'string' && typeof value === 'string') {
+							return itemValue.toLowerCase().includes(value.toLowerCase())
+						}
+						return itemValue === value
+					})
+			})
+			const startIndex = (page - 1) * actualPageSize
+			const paginatedData = results.slice(startIndex, startIndex + actualPageSize)
+			const nextCursor = paginatedData.length > 0
+				? (paginatedData[paginatedData.length - 1] as Record<string, unknown>).createdAt as Date
+				: null
+			const data = schema.array().parse(paginatedData)
+			return {
+				items: data,
+				nextCursor,
+			}
+		},
+		findMatchWithCursor: (criteria, cursor, options = {}) => {
+			const { page = 1, pageSize = defaultPageSize } = options
+			const actualPageSize = Math.min(pageSize, maxPageSize)
+			const results = Array.from(db.values()).filter((item) => {
+				const itemRecord = item as Record<string, unknown>
+				const itemDate = itemRecord.createdAt as Date
+				return (!cursor || itemDate > cursor) &&
+					Object.entries(criteria).some(([key, value]) => {
+						const itemValue = itemRecord[key]
+						if (typeof itemValue === 'string' && typeof value === 'string') {
+							return itemValue.toLowerCase().includes(value.toLowerCase())
+						}
+						return itemValue === value
+					})
+			})
+			const startIndex = (page - 1) * actualPageSize
+			const paginatedData = results.slice(startIndex, startIndex + actualPageSize)
+			const nextCursor = paginatedData.length > 0
+				? (paginatedData[paginatedData.length - 1] as Record<string, unknown>).createdAt as Date
+				: null
+			const data = schema.array().parse(paginatedData)
+			return {
+				items: data,
+				nextCursor,
+			}
+		},	
 		db,
 		entityName,
 	}
