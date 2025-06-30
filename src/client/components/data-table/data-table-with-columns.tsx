@@ -32,11 +32,11 @@ export function withColumns<TData>({
 			...column,
 			id,
 			// Apply column sizing properly
-			...(column.size && {
-				size: column.size,
-				minSize: column.minSize || column.size,
-				maxSize: column.maxSize || column.size,
-			}),
+			// ...(column.size && {
+			// 	size: column.size,
+			// 	minSize: column.minSize || column.size,
+			// 	maxSize: column.maxSize || column.size,
+			// }),
 			...(column.meta?.filterHeader && {
 				header: ({ column: headerColumn }) => (
 					<DataTableColumnHeader
@@ -138,6 +138,7 @@ function selectionColumn<TData>(): ColumnDef<TData> {
 				<Checkbox
 					aria-label='Select all'
 					checked={checked}
+					className='size-4'
 					onCheckedChange={onCheckedChange}
 				/>
 			)
@@ -148,7 +149,7 @@ function selectionColumn<TData>(): ColumnDef<TData> {
 				(value: boolean) => row.toggleSelected(!!value),
 				[row],
 			)
-			return <Checkbox checked={checked} onCheckedChange={onCheckedChange} />
+			return <Checkbox checked={checked} onCheckedChange={onCheckedChange} className='min-size-6' />
 		},
 	}
 }

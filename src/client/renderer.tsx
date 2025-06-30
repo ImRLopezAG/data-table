@@ -9,7 +9,6 @@ client.get(
 	reactRenderer(
 		({ title }) => {
 			const isDev = import.meta.env.DEV
-
 			return (
 				<html lang='en' suppressHydrationWarning>
 					<head>
@@ -39,7 +38,7 @@ client.get(
 	),
 )
 
-client.get('/', (c) => {
+client.get('*', (c) => {
 	return c.render(<div>Loading...</div>, {
 		title: 'Components App',
 	})

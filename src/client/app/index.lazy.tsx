@@ -4,6 +4,7 @@ import { Calendar } from '@components/ui/calendar'
 import { Checkbox } from '@components/ui/checkbox'
 import { Label } from '@components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
+import { createLazyFileRoute } from '@tanstack/react-router'
 import {
 	ChevronLeft,
 	ChevronRight,
@@ -13,7 +14,7 @@ import {
 import { useState } from 'react'
 
 import { cn } from '@/lib/utils'
-import type { Commit } from '@server/services/commit'
+import type { Commit } from '@server/schemas/commit.schema'
 
 import { useCommits } from '@hooks/use-commits'
 import { dates, values } from '@lib/utils'
@@ -25,10 +26,13 @@ import {
 	Loader2,
 	XCircle,
 } from 'lucide-react'
+export const Route = createLazyFileRoute('/')({
+	component: Index,
+})
 
 const CommitTable = createDataTable<Commit>()
 
-export const App = () => {
+function Index() {
 	const {
 		draggable,
 		currentPage,
@@ -46,6 +50,7 @@ export const App = () => {
 		toggleDraggable,
 		isLoading,
 		isFetchingNextPage,
+		isSearching,
 		currentPageData,
 		hasNextPage,
 		ITEMS_PER_PAGE,
@@ -147,14 +152,14 @@ export const App = () => {
 							)}
 						</CommitTable.Toolbar.Search>
 					</CommitTable.Toolbar>
-					<CommitTable.Column accessorKey='hash' filterHeader='Hash' maxSize={20}>
+					<CommitTable.Column accessorKey='hash' filterHeader='Hash' size={40}>
 						{({ row }) => row.original.hash.slice(0, 7)}
 					</CommitTable.Column>
 					<CommitTable.Column
 						accessorKey='message'
 						filterHeader='Message'
 						editable
-						size={145}
+						size={200}
 					>
 						{({ row }) => row.original.message}
 					</CommitTable.Column>
@@ -162,7 +167,6 @@ export const App = () => {
 						accessorKey='author'
 						filterHeader='Author'
 						editable
-						maxSize={40}
 					>
 						{({ row }) => row.original.author}
 					</CommitTable.Column>
@@ -171,8 +175,6 @@ export const App = () => {
 						filterHeader='Date'
 						filterVariant='range'
 						editable
-												maxSize={30}
-
 					>
 						{({ row }) => {
 							const [open, setOpen] = useState(false)
@@ -211,8 +213,6 @@ export const App = () => {
 						accessorKey='value'
 						filterHeader='Value'
 						filterVariant='range'
-												maxSize={17}
-
 					>
 						{({ row }) => row.original.value}
 					</CommitTable.Column>
@@ -220,8 +220,6 @@ export const App = () => {
 						accessorKey='status'
 						header='Status'
 						filterVariant='multi-select'
-												maxSize={30}
-
 					>
 						{({ row }) => {
 							const currentStatus = row.original.status
@@ -279,11 +277,18 @@ export const App = () => {
 									{currentPageData.length} row(s) selected on this page.
 								</div>
 
-								{/* Loading indicator */}
+								{/* Loading indicators */}
 								{isFetchingNextPage && (
 									<div className='flex items-center gap-2 text-muted-foreground text-sm'>
 										<Loader2 className='size-4 animate-spin' />
 										<span>Loading more data...</span>
+									</div>
+								)}
+
+								{isSearching && !isFetchingNextPage && (
+									<div className='flex items-center gap-2 text-muted-foreground text-sm'>
+										<Loader2 className='size-4 animate-spin' />
+										<span>Searching...</span>
 									</div>
 								)}
 

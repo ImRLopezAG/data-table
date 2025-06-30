@@ -1,11 +1,12 @@
-import { fetcher } from '@lib/fetcher'
-import type { Commit, CommitPaginated } from '@server/services/commit'
+import type { Commit } from '@/server/schemas/commit.schema'
 import {
-	type InfiniteData,
+	useInfiniteQuery,
 	useMutation,
 	useQueryClient,
 	useSuspenseInfiniteQuery,
-} from '@tanstack/react-query'
+	useTRPC,
+} from '@lib/trpc'
+import type { InfiniteData } from '@tanstack/react-query'
 import { CheckCircle, HelpCircle, XCircle } from 'lucide-react'
 import type React from 'react'
 import {
@@ -19,7 +20,6 @@ import {
 import { toast } from 'sonner'
 
 // Constants
-const COMMIT_KEY = 'commits' as const
 const ITEMS_PER_PAGE = 20
 const SEARCH_DEBOUNCE_DELAY = 500
 
@@ -51,8 +51,6 @@ type PaginationAction =
 	| { type: 'RESET' }
 	| { type: 'GO_TO_FIRST' }
 	| { type: 'GO_TO_LAST'; lastPage: number }
-
-type NavigationDirection = 'first' | 'previous' | 'next' | 'last'
 
 // Action creators for better type safety
 const paginationActions = {
@@ -128,168 +126,43 @@ const STATUS_OPTIONS: StatusOption[] = [
 	{ value: 'pending', icon: HelpCircle, label: 'Pending' },
 ] as const
 
-const EMPTY_PAGINATION_RESPONSE: CommitPaginated = {
-	data: [],
-	pagination: {
-		page: 1,
-		pageSize: ITEMS_PER_PAGE,
-		total: 0,
-		hasNext: false,
-		hasPrev: false,
-		currentPage: 1,
-	},
-} as const
-
-const EMPTY_PAGINATION_INFO: PaginationInfo = {
-	currentPage: 0,
-	totalPages: 0,
-	total: 0,
-	hasNext: false,
-	loadedItems: 0,
-	pageSize: ITEMS_PER_PAGE,
-	loadedPages: 0,
-} as const
-
-// API functions with better error handling
-const apiClient = {
-	fetchCommits: async (
-		page: unknown,
-		signal?: AbortSignal,
-	): Promise<CommitPaginated> => {
-		const [error, data] = await fetcher<CommitPaginated>(
-			`/api/commits?page=${page}&pageSize=${ITEMS_PER_PAGE}`,
-			{ signal },
-		)
-		if (error) {
-			// Don't log or show toast for abort errors - they're intentional cancellations
-			if (error.name === 'AbortError' || signal?.aborted) {
-				throw error // Re-throw abort errors so React Query can handle them properly
-			}
-			console.error('Failed to fetch commits:', error)
-			toast.error('Failed to fetch commits', {
-				description: error.message || 'There was an error fetching commits.',
-			})
-			return EMPTY_PAGINATION_RESPONSE
-		}
-		return data
-	},
-
-	searchCommits: async (
-		query: string,
-		signal?: AbortSignal,
-	): Promise<CommitPaginated> => {
-		const [error, data] = await fetcher<CommitPaginated>(
-			`/api/commits/search/?q=${encodeURIComponent(query)}&page=1&pageSize=${ITEMS_PER_PAGE}`,
-			{ signal },
-		)
-		if (error) {
-			// Don't log or show toast for abort errors - they're intentional cancellations
-			if (error.name === 'AbortError' || signal?.aborted) {
-				throw error // Re-throw abort errors so React Query can handle them properly
-			}
-			console.error('Failed to search commits:', error)
-			toast.error('Failed to search commits', {
-				description:
-					error.message || 'There was an error searching for commits.',
-			})
-			return EMPTY_PAGINATION_RESPONSE
-		}
-		return data
-	},
-	updateCommit: async (
-		commit: Partial<Commit>,
-		signal?: AbortSignal,
-	): Promise<Commit> => {
-		const [error, data] = await fetcher<Commit>(`/api/commits/${commit.id}`, {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(commit),
-			signal,
-		})
-		if (error) {
-			// Don't log or show toast for abort errors - they're intentional cancellations
-			if (error.name === 'AbortError' || signal?.aborted) {
-				throw error // Re-throw abort errors so React Query can handle them properly
-			}
-			console.error('Failed to update commit:', error)
-			toast.error('Failed to update commit', {
-				description: error.message || 'There was an error updating the commit.',
-			})
-			throw new Error(`Failed to update commit: ${error.message}`)
-		}
-		return data
-	},
-}
-
 // Cache utilities
 const createCacheUpdater = (
 	queryClient: ReturnType<typeof useQueryClient>,
+	trpc: ReturnType<typeof useTRPC>,
 ) => ({
-	addPage: (pageData: CommitPaginated, pageNumber: number) => {
-		queryClient.setQueryData<InfiniteData<CommitPaginated>>(
-			[COMMIT_KEY],
-			(oldData) => {
-				if (!oldData?.pages) return oldData
-
-				// Avoid duplicate pages
-				const pageExists = oldData.pages.some(
-					(page) => page.pagination.page === pageNumber,
-				)
-
-				if (pageExists) return oldData
-
-				return {
-					...oldData,
-					pages: [...oldData.pages, pageData],
-					pageParams: [...(oldData.pageParams || []), pageNumber],
-				}
-			},
-		)
-	},
-
-	replaceWithSearchResults: (searchResults: CommitPaginated) => {
-		queryClient.setQueryData<InfiniteData<CommitPaginated>>(
-			[COMMIT_KEY],
-			(oldData) => {
-				if (!oldData?.pages) return oldData
-
-				return {
-					...oldData,
-					pages: [searchResults],
-					pageParams: [undefined],
-				}
-			},
-		)
-	},
-
 	optimisticUpdate: (updatedCommit: Partial<Commit>) => {
-		queryClient.setQueryData<InfiniteData<CommitPaginated>>(
-			[COMMIT_KEY],
-			(oldData) => {
-				if (!oldData?.pages) return oldData
+		// Use tRPC query key instead of hardcoded key
+		const queryKey = trpc.commits.infinite.queryKey()
 
-				return {
-					...oldData,
-					pages: oldData.pages.map((page) => ({
-						...page,
-						data: page.data.map((commit) =>
-							commit.id === updatedCommit.id
-								? { ...commit, ...updatedCommit }
-								: commit,
-						),
-					})),
-				}
-			},
-		)
+		queryClient.setQueryData<
+			InfiniteData<{ items: Commit[]; nextCursor: Date | null }>
+		>(queryKey, (oldData) => {
+			if (!oldData?.pages) return oldData
+
+			return {
+				...oldData,
+				pages: oldData.pages.map((page) => ({
+					...page,
+					items: page.items.map((commit: Commit) =>
+						commit.id === updatedCommit.id
+							? { ...commit, ...updatedCommit }
+							: commit,
+					),
+				})),
+			}
+		})
 	},
 })
 
 // Main hook
 export function useCommits() {
 	const queryClient = useQueryClient()
+	const trpc = useTRPC()
+
 	const cacheUpdater = useMemo(
-		() => createCacheUpdater(queryClient),
-		[queryClient],
+		() => createCacheUpdater(queryClient, trpc),
+		[queryClient, trpc.commits],
 	)
 
 	// State management
@@ -304,207 +177,242 @@ export function useCommits() {
 		SEARCH_DEBOUNCE_DELAY,
 	)
 
-	// Main query
-	const queryResult = useSuspenseInfiniteQuery<CommitPaginated>({
-		queryKey: [COMMIT_KEY],
-		queryFn: async ({ pageParam = 1, signal }) =>
-			apiClient.fetchCommits(pageParam, signal),
-		getNextPageParam: (lastPage) =>
-			lastPage.pagination.hasNext ? lastPage.pagination.page + 1 : undefined,
-		initialPageParam: 1,
-	})
-
-	// Computed values
-	const commits = useMemo(
-		() => queryResult.data?.pages?.flatMap((page) => page.data) ?? [],
-		[queryResult.data],
+	// Use the correct tRPC pattern for infinite queries
+	const infiniteCommitsOptions = trpc.commits.infinite.infiniteQueryOptions(
+		{
+			cursor: null,
+			take: ITEMS_PER_PAGE,
+		},
+		{
+			getNextPageParam: (lastPage) => lastPage.nextCursor,
+		},
 	)
 
+	// Use tRPC for the main query - this is the correct way
+	const queryResult = useSuspenseInfiniteQuery(infiniteCommitsOptions)
+
+	// Search query - use a separate query for search results (non-suspense to avoid flash)
+	const searchQueryResult = useInfiniteQuery(
+		trpc.commits.search.infiniteQueryOptions(
+			{
+				query: debouncedSearch,
+				cursor: null,
+				take: ITEMS_PER_PAGE,
+			},
+			{
+				getNextPageParam: (lastPage) => lastPage.nextCursor,
+				enabled: !!debouncedSearch.trim(),
+			},
+		),
+	)
+
+	// Determine which query result to use based on search state
+	// Only switch to search results when we have actual search data or when loading
+	const activeQueryResult =
+		debouncedSearch.trim() &&
+		(searchQueryResult.data || searchQueryResult.isLoading)
+			? searchQueryResult
+			: queryResult
+
+	// Update mutation using tRPC
+	const updateCommitMutation = useMutation(
+		trpc.commits.updateCommit.mutationOptions({
+			onMutate: async (variables) => {
+				await queryClient.cancelQueries({
+					queryKey: trpc.commits.infinite.queryKey(),
+				})
+
+				// Snapshot the previous value
+				const previousData = queryClient.getQueryData(
+					trpc.commits.infinite.queryKey(),
+				)
+
+				// Optimistically update to the new value
+				if (variables.data) {
+					cacheUpdater.optimisticUpdate({ id: variables.id, ...variables.data })
+				}
+
+				return { previousData }
+			},
+			onError: (err, _variables, context) => {
+				// If the mutation fails, use the context returned from onMutate to roll back
+				if (context?.previousData) {
+					queryClient.setQueryData(
+						trpc.commits.infinite.queryKey(),
+						context.previousData,
+					)
+				}
+				toast.error('Failed to update commit', {
+					description: err.message || 'There was an error updating the commit.',
+				})
+			},
+			onSuccess: () => {
+				toast.success('Commit updated successfully', {
+					description: 'The commit has been updated.',
+				})
+			},
+			onSettled: () => {
+				// Always refetch after error or success
+				queryClient.invalidateQueries({
+					queryKey: trpc.commits.infinite.queryKey(),
+				})
+			},
+		}),
+	)
+
+	// Computed values with better fallback handling
+	const commits = useMemo(() => {
+		const data =
+			activeQueryResult.data?.pages?.flatMap(
+				(page: { items: Commit[] }) => page.items,
+			) ?? []
+
+		// If we're searching and have no results yet, show the main query data
+		// to prevent flashing empty state
+		if (
+			debouncedSearch.trim() &&
+			data.length === 0 &&
+			searchQueryResult.isLoading
+		) {
+			return (
+				queryResult.data?.pages?.flatMap(
+					(page: { items: Commit[] }) => page.items,
+				) ?? []
+			)
+		}
+
+		return data
+	}, [
+		activeQueryResult.data,
+		debouncedSearch,
+		searchQueryResult.isLoading,
+		queryResult.data,
+	])
+
+	// Calculate pagination info based on infinite query structure
 	const paginationInfo: PaginationInfo = useMemo(() => {
-		const pages = queryResult.data?.pages
+		const pages = activeQueryResult.data?.pages
 
-		if (!pages?.length) return EMPTY_PAGINATION_INFO
+		if (!pages?.length) {
+			return {
+				currentPage: 0,
+				totalPages: 0,
+				total: 0,
+				hasNext: false,
+				loadedItems: 0,
+				pageSize: ITEMS_PER_PAGE,
+				loadedPages: 0,
+			}
+		}
 
-		// Find the page with the most accurate total count (usually the latest)
-		const mostRecentPage = pages[pages.length - 1]
-		if (!mostRecentPage || !mostRecentPage.pagination)
-			return EMPTY_PAGINATION_INFO
+		const totalItems = commits.length
+		const estimatedTotalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
 
-		const totalItems = mostRecentPage.pagination.total
-		const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
+		// For infinite queries, we estimate total pages based on loaded data
+		// and whether there are more pages available
+		const hasMoreData = activeQueryResult.hasNextPage
+		const adjustedTotalPages = hasMoreData
+			? estimatedTotalPages + 1
+			: estimatedTotalPages
 
 		return {
 			currentPage: paginationState.currentPage + 1, // Convert to 1-based indexing
-			totalPages,
+			totalPages: Math.max(adjustedTotalPages, paginationState.currentPage + 1),
 			total: totalItems,
-			hasNext: paginationState.currentPage + 1 < totalPages,
+			hasNext: activeQueryResult.hasNextPage ?? false,
 			loadedItems: commits.length,
 			pageSize: ITEMS_PER_PAGE,
 			loadedPages: pages.length,
 		}
-	}, [queryResult.data?.pages, commits.length, paginationState.currentPage])
+	}, [
+		activeQueryResult.data?.pages,
+		activeQueryResult.hasNextPage,
+		commits.length,
+		paginationState.currentPage,
+	])
 
 	const currentPageData = useMemo(() => {
-		const targetPageNumber = paginationState.currentPage + 1
-		const targetPage = queryResult.data?.pages?.find(
-			(page) => page.pagination.page === targetPageNumber,
-		)
-
-		if (targetPage) return targetPage.data
-
-		// Fallback to slice method
+		// For infinite queries, slice the data based on current page
 		const startIndex = paginationState.currentPage * ITEMS_PER_PAGE
-		return commits.slice(startIndex, startIndex + ITEMS_PER_PAGE)
-	}, [commits, paginationState.currentPage, queryResult.data?.pages])
+		const pageData = commits.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+
+		// If current page is empty but we have commits, reset to first page
+		if (
+			pageData.length === 0 &&
+			commits.length > 0 &&
+			paginationState.currentPage > 0
+		) {
+			// Don't modify state directly here, just return first page data
+			return commits.slice(0, ITEMS_PER_PAGE)
+		}
+
+		return pageData
+	}, [commits, paginationState.currentPage])
 
 	const navigationState = useMemo(
 		() => ({
 			canPreviousPage: paginationState.currentPage > 0,
-			canNextPage: paginationState.currentPage + 2 <= paginationInfo.totalPages,
+			canNextPage: paginationState.currentPage + 1 < paginationInfo.totalPages,
 			totalPages: paginationInfo.totalPages,
 		}),
 		[paginationState.currentPage, paginationInfo.totalPages],
 	)
 
-	// Generic page fetching with caching
-	const fetchAndCachePage = useCallback(
-		async (pageNumber: number) => {
-			const pageExists = queryResult.data?.pages?.some(
-				(page) => page.pagination.page === pageNumber,
-			)
-
-			if (pageExists) return
-
-			try {
-				const pageData = await apiClient.fetchCommits(pageNumber)
-				cacheUpdater.addPage(pageData, pageNumber)
-			} catch (error) {
-				// Don't log abort errors as they're intentional cancellations
-				if (error instanceof Error && error.name !== 'AbortError') {
-					toast.error('Failed to fetch page', {
-						description:
-							error.message || 'There was an error fetching the page.',
-					})
-					console.error(`Failed to fetch page ${pageNumber}:`, error)
-				}
-				throw error
-			}
-		},
-		[queryResult.data?.pages, cacheUpdater],
-	)
-
-	// Navigation handlers with unified error handling
-	const createNavigationHandler = useCallback(
-		(
-			direction: NavigationDirection,
-			getPageInfo: () => { pageNumber: number; pageIndex: number } | null,
-		) => {
-			return async () => {
-				const pageInfo = getPageInfo()
-				if (!pageInfo) return
-
-				try {
-					await fetchAndCachePage(pageInfo.pageNumber)
-
-					switch (direction) {
-						case 'first':
-							dispatch(paginationActions.goToFirst())
-							break
-						case 'last':
-							dispatch(paginationActions.goToLast(pageInfo.pageIndex))
-							break
-						default:
-							dispatch(paginationActions.setPage(pageInfo.pageIndex))
-					}
-				} catch (error) {
-					// Don't log abort errors as they're intentional cancellations
-					if (error instanceof Error && error.name !== 'AbortError') {
-						console.error(`Navigation to ${direction} failed:`, error)
-					}
-				}
-			}
-		},
-		[fetchAndCachePage],
-	)
-
 	// Navigation handlers
-	const handlePreviousPage = createNavigationHandler('previous', () => {
-		if (!navigationState.canPreviousPage) return null
-		const pageIndex = paginationState.currentPage - 1
-		return { pageIndex, pageNumber: pageIndex + 1 }
-	})
+	const handlePreviousPage = useCallback(() => {
+		if (navigationState.canPreviousPage) {
+			dispatch(paginationActions.setPage(paginationState.currentPage - 1))
+		}
+	}, [navigationState.canPreviousPage, paginationState.currentPage])
 
-	const handleNextPage = createNavigationHandler('next', () => {
-		if (!navigationState.canNextPage) return null
-		const pageIndex = paginationState.currentPage + 1
-		return { pageIndex, pageNumber: pageIndex + 1 }
-	})
+	const handleNextPage = useCallback(() => {
+		if (navigationState.canNextPage) {
+			const nextPageStartIndex =
+				(paginationState.currentPage + 1) * ITEMS_PER_PAGE
 
-	const handleFirstPage = createNavigationHandler('first', () => ({
-		pageIndex: 0,
-		pageNumber: 1,
-	}))
+			// If we have enough data for the next page, go to it immediately
+			if (nextPageStartIndex < commits.length) {
+				dispatch(paginationActions.setPage(paginationState.currentPage + 1))
+			}
+			// If we need to fetch more data, fetch it first
+			else if (
+				activeQueryResult.hasNextPage &&
+				!activeQueryResult.isFetchingNextPage
+			) {
+				activeQueryResult.fetchNextPage().then(() => {
+					// Only advance page after data is fetched
+					dispatch(paginationActions.setPage(paginationState.currentPage + 1))
+				})
+			}
+		}
+	}, [
+		navigationState.canNextPage,
+		paginationState.currentPage,
+		activeQueryResult,
+		commits.length,
+	])
 
-	const handleLastPage = createNavigationHandler('last', () => ({
-		pageIndex: navigationState.totalPages - 1,
-		pageNumber: navigationState.totalPages,
-	}))
+	const handleFirstPage = useCallback(() => {
+		dispatch(paginationActions.goToFirst())
+	}, [])
+
+	const handleLastPage = useCallback(() => {
+		// For infinite queries, we can only go to the last loaded page
+		const lastLoadedPageIndex = Math.floor(
+			(commits.length - 1) / ITEMS_PER_PAGE,
+		)
+		dispatch(paginationActions.goToLast(lastLoadedPageIndex))
+	}, [commits.length])
 
 	// Other handlers
 	const handleReset = useCallback(() => {
 		dispatch(paginationActions.reset())
-		queryClient.resetQueries({ queryKey: [COMMIT_KEY] })
-	}, [queryClient])
+		queryClient.resetQueries({ queryKey: trpc.commits.infinite.queryKey() })
+	}, [queryClient, trpc])
 
 	const handleSearch = useCallback((value: string) => {
 		dispatch(paginationActions.setSearch(value))
 	}, [])
-
-	// Search effect with cleanup
-	useEffect(() => {
-		const controller = new AbortController()
-
-		const performSearch = async () => {
-			if (!debouncedSearch.trim()) {
-				queryClient.invalidateQueries({ queryKey: [COMMIT_KEY] })
-				return
-			}
-
-			try {
-				const searchResults = await apiClient.searchCommits(
-					debouncedSearch,
-					controller.signal,
-				)
-
-				if (controller.signal.aborted) return
-
-				const searchPage: CommitPaginated = {
-					data: searchResults.data || [],
-					pagination: searchResults.pagination || {
-						page: 1,
-						pageSize: ITEMS_PER_PAGE,
-						total: searchResults.data?.length || 0,
-						hasNext: false,
-						hasPrev: false,
-						currentPage: 1,
-					},
-				}
-
-				cacheUpdater.replaceWithSearchResults(searchPage)
-			} catch (error) {
-				if (!controller.signal.aborted) {
-					console.error('Search failed:', error)
-					toast.error('Failed to search commits', {
-						description: 'There was an error searching for commits.',
-					})
-				}
-			}
-		}
-
-		performSearch()
-
-		return () => controller.abort()
-	}, [debouncedSearch, queryClient, cacheUpdater])
 
 	// Reset page when no commits
 	useEffect(() => {
@@ -513,44 +421,21 @@ export function useCommits() {
 		}
 	}, [commits.length, paginationState.currentPage])
 
-	// Update mutation with optimistic updates
-	const updateCommit = useMutation({
-		mutationFn: apiClient.updateCommit,
-		async onMutate(newCommit) {
-			await queryClient.cancelQueries({ queryKey: [COMMIT_KEY] })
-
-			const previousData = queryClient.getQueryData<
-				InfiniteData<CommitPaginated>
-			>([COMMIT_KEY])
-
-			cacheUpdater.optimisticUpdate(newCommit)
-
-			return { previousData }
-		},
-		onError: (_err, _newCommit, context) => {
-			if (context?.previousData) {
-				queryClient.setQueryData([COMMIT_KEY], context.previousData)
+	const handleUpdateCommit = useCallback(
+		(changes: Partial<Commit>) => {
+			if (!changes.id) {
+				toast.error('Commit ID is required for update', {
+					description: 'Please provide a valid commit ID.',
+				})
+				return
 			}
-			toast.error('Failed to update commit', {
-				description: 'There was an error updating the commit.',
+			updateCommitMutation.mutate({
+				id: changes.id,
+				data: changes,
 			})
 		},
-		onSuccess: () => {
-			toast.success('Commit updated successfully', {
-				description: 'The commit has been updated.',
-			})
-		},
-	})
-
-	const handleUpdateCommit = useCallback((changes: Partial<Commit>) => {
-		if (!changes.id) {
-			toast.error('Commit ID is required for update', {
-				description: 'Please provide a valid commit ID.',
-			})
-			return
-		}
-		updateCommit.mutate(changes)
-	}, [])
+		[updateCommitMutation],
+	)
 
 	// Return organized API
 	return {
@@ -579,11 +464,16 @@ export function useCommits() {
 		handleUpdateCommit,
 		toggleDraggable,
 
-		// Query state
-		isLoading: queryResult.isLoading,
-		isFetchingNextPage: queryResult.isFetchingNextPage,
-		hasNextPage: queryResult.hasNextPage,
-		refetch: queryResult.refetch,
+		// Query state - handle loading states more gracefully
+		isLoading: debouncedSearch.trim()
+			? (searchQueryResult.isLoading || searchQueryResult.isFetching) && !searchQueryResult.data
+			: (activeQueryResult.isLoading || activeQueryResult.isFetching) && !activeQueryResult.data,
+		isFetchingNextPage: activeQueryResult.isFetchingNextPage,
+		hasNextPage: activeQueryResult.hasNextPage,
+		refetch: activeQueryResult.refetch,
+
+		// Search specific state
+		isSearching: !!debouncedSearch.trim() && searchQueryResult.isFetching,
 
 		// Constants
 		ITEMS_PER_PAGE,
