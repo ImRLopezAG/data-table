@@ -23,6 +23,8 @@ declare global {
 		hasNext: boolean
 		hasPrev: boolean
 		currentPage: number
+
+		nextCursor?: Date | null
 	}
 
 	export interface PaginatedResult<T> {

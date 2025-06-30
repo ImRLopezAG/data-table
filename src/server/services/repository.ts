@@ -75,6 +75,7 @@ export function createRepository<
 				hasPrev,
 				currentPage,
 				page,
+
 			},
 		}
 	}
@@ -306,7 +307,6 @@ export function createRepository<
 
 			// Get paginated results
 			const data = repository.findAll(options)
-
 			return {
 				data,
 				pagination: {
