@@ -1,10 +1,10 @@
-import {
-	useColumnOrderManagement,
-	useDataTable,
-} from '@/client/hooks/use-data-table'
+/** biome-ignore-all lint/suspicious/noExplicitAny: This Is Any type for the context */
+
+import { Action } from '@components/data-table/data-table-action'
 import type { Cell, ColumnDef, Header, Row, Table } from '@tanstack/react-table'
 import type { Virtualizer } from '@tanstack/react-virtual'
-import React, { Suspense, createContext, lazy, use } from 'react'
+import React, { createContext, lazy, Suspense, use } from 'react'
+import { useDataTable } from '@/client/hooks/use-data-table'
 import type { DataTablePaginationProps } from './data-table-pagination'
 import {
 	DataTableToolbar,
@@ -69,12 +69,10 @@ interface DataTableProps<TData> {
 }
 
 // Create a context that stores the actual data type
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 interface DataTableContextValue<TData = any> {
 	table: Table<TData>
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 const DataTableContext = createContext<DataTableContextValue<any> | null>(null)
 
 interface BuildTableProps<TData> {
@@ -86,17 +84,17 @@ interface BuildTableProps<TData> {
 		loading?: boolean
 		emptyState?: React.ReactNode
 		columnOrder: string[]
-		handleDragEnd: (activeId: string, overId: string) => void
+		handleChangeColumnOrder: (newOrder: string[]) => void
 		toolbarChildren?: React.ReactNode
 		paginationChildren?: React.ReactNode
-    draggable?: boolean
+		draggable?: boolean
 	}) => React.ReactNode
 }
 export function buildTable<TData = unknown>(builder: BuildTableProps<TData>) {
 	// Create typed compound components
 	const Column = (_: DataTableColumnProps<TData>): null => null
 
-	const Action = (_: DataTableColumnProps<TData>): null => null
+	const Actions = (_: DataTableColumnProps<TData>): null => null
 
 	const Toolbar = (props: Omit<DataTableToolbarProps<TData>, 'table'>) => {
 		const context = use(DataTableContext) as DataTableContextValue<TData>
@@ -151,7 +149,9 @@ export function buildTable<TData = unknown>(builder: BuildTableProps<TData>) {
 	// Custom pagination component with render prop
 	const PaginationCustom = ({
 		children,
-	}: { children: (table: Table<TData>) => React.ReactNode }) => {
+	}: {
+		children: (table: Table<TData>) => React.ReactNode
+	}) => {
 		const context = use(DataTableContext) as DataTableContextValue<TData>
 		if (!context) {
 			throw new Error(
@@ -172,7 +172,7 @@ export function buildTable<TData = unknown>(builder: BuildTableProps<TData>) {
 		) as Array<React.ReactElement<DataTableColumnProps<TData>>>
 
 		const actionChildren = React.Children.toArray(children).filter(
-			(child) => React.isValidElement(child) && child.type === Action,
+			(child) => React.isValidElement(child) && child.type === Actions,
 		) as Array<React.ReactElement<DataTableColumnProps<TData>>>
 
 		// Convert column children to ColumnDef objects
@@ -304,11 +304,10 @@ export function buildTable<TData = unknown>(builder: BuildTableProps<TData>) {
 			enableColumnVisibility: true,
 		})
 
-		// Column order management for drag & drop
-		const { columnOrder, handleDragEnd } = useColumnOrderManagement(
-			state.columnOrder,
-		)
-
+		const [columnOrder, setColumnOrder] = React.useState(state.columnOrder)
+		const handleChangeColumnOrder = React.useCallback((newOrder: string[]) => {
+			setColumnOrder(newOrder)
+		}, [])
 		// Split children into their respective components
 		const toolbarChildren = React.Children.toArray(children).filter(
 			(child) => React.isValidElement(child) && child.type === Toolbar,
@@ -326,11 +325,11 @@ export function buildTable<TData = unknown>(builder: BuildTableProps<TData>) {
 					loading: props.loading,
 					emptyState: props.emptyState,
 					columnOrder,
-					handleDragEnd,
+					handleChangeColumnOrder,
 					toolbarChildren:
 						toolbarChildren.length > 0 ? toolbarChildren : undefined,
 					paginationChildren: hasPagination ? paginationChildren : undefined,
-          draggable: props.draggable,
+					draggable: props.draggable,
 				})}
 			</DataTableContext.Provider>
 		)
@@ -338,7 +337,10 @@ export function buildTable<TData = unknown>(builder: BuildTableProps<TData>) {
 
 	// Attach compound components
 	DataTableComponent.Column = Column
-	DataTableComponent.Action = Action
+	const ActionsWithAction = Object.assign(Actions, {
+		Action,
+	})
+	DataTableComponent.Actions = ActionsWithAction
 
 	// Create a new Toolbar component with CreateComponent attached
 	const ToolbarWithCreateComponent = Object.assign(Toolbar, {

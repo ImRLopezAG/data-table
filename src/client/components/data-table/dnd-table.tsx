@@ -1,35 +1,35 @@
 'use client'
-import type { CSSProperties } from 'react'
 
 import {
+	closestCenter,
 	DndContext,
 	type DragEndEvent,
 	KeyboardSensor,
 	MouseSensor,
 	TouchSensor,
-	closestCenter,
 	useSensor,
 	useSensors,
 } from '@dnd-kit/core'
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers'
 import {
-	SortableContext,
+	arrayMove,
 	horizontalListSortingStrategy,
+	SortableContext,
 	useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Cell, Header, Row, Table as TTable } from '@tanstack/react-table'
 import { flexRender } from '@tanstack/react-table'
-
-import { cn } from '@/lib/utils'
 import type { Virtualizer } from '@tanstack/react-virtual'
+import type { CSSProperties } from 'react'
 import React from 'react'
+import { cn } from '@/lib/utils'
 import { Table } from './components'
 
 export interface DraggableTableProps<TData> {
 	table: TTable<TData>
 	columnOrder: string[]
-	handleDragEnd: (activeId: string, overId: string) => void
+	handleColumnOrderChange: (newOrder: string[]) => void
 	loading?: boolean
 	virtualizer: Virtualizer<HTMLDivElement, Element>
 	emptyState?: React.ReactNode
@@ -48,7 +48,7 @@ export function DraggableTable<TData>({
 	table,
 	columnOrder,
 	classNames,
-	handleDragEnd,
+	handleColumnOrderChange,
 	loading = false,
 	virtualizer,
 	emptyState,
@@ -72,10 +72,12 @@ export function DraggableTable<TData>({
 		(event: DragEndEvent) => {
 			const { active, over } = event
 			if (active && over && active.id !== over.id) {
-				handleDragEnd(active.id as string, over.id as string)
+				const oldIndex = columnOrder.indexOf(active.id as string)
+				const newIndex = columnOrder.indexOf(over.id as string)
+				handleColumnOrderChange(arrayMove(columnOrder, oldIndex, newIndex))
 			}
 		},
-		[handleDragEnd],
+		[handleColumnOrderChange],
 	)
 
 	const draggableColumns = React.useMemo(

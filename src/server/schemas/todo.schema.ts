@@ -6,7 +6,7 @@ export const todoSchema = z.object({
 	description: z.string().max(500).optional(),
 	createdAt: z.date().optional(),
 	updatedAt: z.date().optional(),
-	status: z.enum(['todo', 'backlog', 'in-progress', 'done', 'canceled']),
+	status: z.enum(['todo', 'backlog', 'in-progress', 'done', 'cancelled']),
 	priority: z.enum(['low', 'medium', 'high']),
 	label: z.enum(['bug', 'feature', 'documentation']),
 	userId: z.string(),

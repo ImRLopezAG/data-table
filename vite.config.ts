@@ -2,13 +2,13 @@ import { cloudflare } from '@cloudflare/vite-plugin'
 import devServer from '@hono/vite-dev-server'
 import adapter from '@hono/vite-dev-server/cloudflare'
 import tailwindcss from '@tailwindcss/vite'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import ssrPlugin from 'vite-ssr-components/plugin'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
-import { tanstackRouter } from '@tanstack/router-plugin/vite'
 
-export default defineConfig(({ command, mode, isSsrBuild }) => {
+export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
 	const isDev = command === 'serve' && mode === 'development'
 
 	return {

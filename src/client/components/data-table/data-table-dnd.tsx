@@ -1,12 +1,10 @@
 'use client'
-import { cn } from '@/lib/utils'
 import type { Table } from '@tanstack/react-table'
-import { Suspense, lazy } from 'react'
-import { StaticTable } from './data-table-static'
-
-import type { DraggableTableProps } from './dnd-table'
-
+import { lazy, Suspense } from 'react'
+import { cn } from '@/lib/utils'
 import { buildTable } from './build-table'
+import { StaticTable } from './data-table-static'
+import type { DraggableTableProps } from './dnd-table'
 
 const LazyDraggableTable = lazy(() => import('./dnd-table'))
 
@@ -25,7 +23,7 @@ export function createDataTable<TData>() {
 								<LazyDraggableTableWrapper
 									table={props.table}
 									columnOrder={props.columnOrder}
-									handleDragEnd={props.handleDragEnd}
+									handleColumnOrderChange={props.handleChangeColumnOrder}
 									classNames={props.classNames}
 									virtualizer={props.virtualizer}
 									emptyState={props.emptyState}

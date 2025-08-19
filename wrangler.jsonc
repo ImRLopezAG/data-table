@@ -1,20 +1,18 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "data-table",
-  "main": "src/index.ts",
-  "compatibility_date": "2025-04-25",
-  "compatibility_flags": [
-    "nodejs_compat",
-  ],
-  "observability": {
-    "enabled": true
-  },
-  "assets": {
-    "directory": "./dist/client/",
-    "binding": "ASSETS"
-  },
-  "route": {
-    "pattern": "components.imrlopez.dev/*",
-    "zone_name": "imrlopez.dev"
-  },
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "data-table",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-04-25",
+	"compatibility_flags": ["nodejs_compat"],
+	"observability": {
+		"enabled": true
+	},
+	"assets": {
+		"directory": "./dist/client/",
+		"binding": "ASSETS"
+	},
+	"route": {
+		"pattern": "components.imrlopez.dev/*",
+		"zone_name": "imrlopez.dev"
+	}
 }

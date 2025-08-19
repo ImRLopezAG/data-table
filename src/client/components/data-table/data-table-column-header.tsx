@@ -1,3 +1,6 @@
+import type { Column } from '@tanstack/react-table'
+import { ArrowDown, ArrowUp, ArrowUpDown, EyeOff } from 'lucide-react'
+import React from 'react'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -6,9 +9,6 @@ import {
 	DropdownMenuTrigger,
 } from '@/client/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
-import type { Column } from '@tanstack/react-table'
-import { ArrowDown, ArrowUp, ArrowUpDown, EyeOff } from 'lucide-react'
-import React from 'react'
 
 interface DataTableColumnHeaderProps<TData>
 	extends React.HTMLAttributes<HTMLDivElement> {
@@ -56,7 +56,10 @@ export function DataTableColumnHeader<TData>({
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<div className='between flex h-6 w-fit cursor-pointer select-none items-center rounded px-1 font-medium text-muted-foreground text-sm hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground' {...props}>
+				<div
+					className='between flex h-6 w-fit cursor-pointer select-none items-center rounded px-1 font-medium text-muted-foreground text-sm hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground'
+					{...props}
+				>
 					<span>{title}</span>
 					{sortIcon}
 				</div>

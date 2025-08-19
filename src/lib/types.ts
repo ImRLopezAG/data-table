@@ -1,4 +1,5 @@
 import type { z } from 'zod/v4'
+
 declare module '@hono/react-renderer' {
 	interface Props {
 		title: string
@@ -11,7 +12,6 @@ interface RepositoryMethodsHooks<T> {
 }
 
 declare global {
-
 	interface Props {
 		children?: React.ReactNode
 		className?: string
@@ -65,9 +65,19 @@ declare global {
 		// Core CRUD operations
 		findAll: (opts?: PaginationOptions) => Entity[]
 		findById: (id: string) => Entity | null
-		create: (data: TInsert<T>, hooks?: RepositoryMethodsHooks<Entity>) => [Error, null] | [null, Entity]
-		update: (id: string, data: TUpdate<T>, hooks?: RepositoryMethodsHooks<Entity>) => [Error, null] | [null, Entity]
-		delete: (id: string, hooks?: RepositoryMethodsHooks<Entity>) => { success: boolean; message?: string }
+		create: (
+			data: TInsert<T>,
+			hooks?: RepositoryMethodsHooks<Entity>,
+		) => [Error, null] | [null, Entity]
+		update: (
+			id: string,
+			data: TUpdate<T>,
+			hooks?: RepositoryMethodsHooks<Entity>,
+		) => [Error, null] | [null, Entity]
+		delete: (
+			id: string,
+			hooks?: RepositoryMethodsHooks<Entity>,
+		) => { success: boolean; message?: string }
 
 		// Query operations
 		findBy: (
@@ -90,28 +100,34 @@ declare global {
 		withCursor: (
 			cursor: Date | null,
 			options?: PaginationOptions,
-		) => {
-			items: Entity[]
-			nextCursor: Date | null
-		}
+		) => WithCursor<Entity>
 		findByWithCursor: (
 			criteria: Partial<Entity>,
 			cursor: Date | null,
 			options?: PaginationOptions,
-		) => {
-			items: Entity[]
-			nextCursor: Date | null
-		}
+		) => WithCursor<Entity>
 		findMatchWithCursor: (
 			criteria: Partial<Entity>,
 			cursor: Date | null,
 			options?: PaginationOptions,
-		) => {
-			items: Entity[]
-			nextCursor: Date | null
-		}
+		) => WithCursor<Entity>
 		// Access to underlying storage and metadata
 		db: Map<string, z.infer<TSelect>>
 		entityName: string
+	}
+}
+
+export interface WithCursor<T> {
+	items: T[]
+	nextCursor: Date | null
+	prevCursor: Date | null
+	total: number
+	pagination: {
+		page: number
+		pageSize: number
+		hasNext: boolean
+		hasPrev: boolean
+		currentPage: number
+		lastPageIndex: number
 	}
 }

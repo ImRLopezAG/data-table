@@ -1,4 +1,3 @@
-import type { Commit } from '@/server/schemas/commit.schema'
 import {
 	useInfiniteQuery,
 	useMutation,
@@ -18,6 +17,7 @@ import {
 	useState,
 } from 'react'
 import { toast } from 'sonner'
+import type { Commit } from '@/server/schemas/commit.schema'
 
 // Constants
 const ITEMS_PER_PAGE = 20
@@ -185,6 +185,10 @@ export function useCommits() {
 		},
 		{
 			getNextPageParam: (lastPage) => lastPage.nextCursor,
+			getPreviousPageParam: (firstPage) => firstPage.prevCursor,
+			trpc: {
+				abortOnUnmount: true,
+			},
 		},
 	)
 
@@ -202,6 +206,7 @@ export function useCommits() {
 			{
 				getNextPageParam: (lastPage) => lastPage.nextCursor,
 				enabled: !!debouncedSearch.trim(),
+				getPreviousPageParam: (firstPage) => firstPage.prevCursor,
 			},
 		),
 	)
@@ -229,7 +234,10 @@ export function useCommits() {
 
 				// Optimistically update to the new value
 				if (variables.data) {
-					cacheUpdater.optimisticUpdate({ id: variables.id, ...variables.data })
+					cacheUpdater.optimisticUpdate({
+						id: variables.id,
+						...variables.data,
+					})
 				}
 
 				return { previousData }
@@ -305,7 +313,7 @@ export function useCommits() {
 			}
 		}
 
-		const totalItems = commits.length
+		const totalItems = pages[0]?.total ?? 0
 		const estimatedTotalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
 
 		// For infinite queries, we estimate total pages based on loaded data
@@ -466,8 +474,10 @@ export function useCommits() {
 
 		// Query state - handle loading states more gracefully
 		isLoading: debouncedSearch.trim()
-			? (searchQueryResult.isLoading || searchQueryResult.isFetching) && !searchQueryResult.data
-			: (activeQueryResult.isLoading || activeQueryResult.isFetching) && !activeQueryResult.data,
+			? (searchQueryResult.isLoading || searchQueryResult.isFetching) &&
+				!searchQueryResult.data
+			: (activeQueryResult.isLoading || activeQueryResult.isFetching) &&
+				!activeQueryResult.data,
 		isFetchingNextPage: activeQueryResult.isFetchingNextPage,
 		hasNextPage: activeQueryResult.hasNextPage,
 		refetch: activeQueryResult.refetch,

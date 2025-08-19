@@ -1,19 +1,17 @@
+import type { Column, Table } from '@tanstack/react-table'
+import { Check, Plus } from 'lucide-react'
+import type { JSX } from 'react'
 import { Badge } from '@/client/components/ui/badge'
 import { Button } from '@/client/components/ui/button'
 import * as CMD from '@/client/components/ui/command'
-import { cn } from '@/lib/utils'
-import type { Column, Table } from '@tanstack/react-table'
-import { Check, Plus } from 'lucide-react'
-import { rangeFilter } from './data-table-with-columns'
-
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from '@/client/components/ui/popover'
-
 import { Separator } from '@/client/components/ui/separator'
-import type { JSX } from 'react'
+import { cn } from '@/lib/utils'
+import { rangeFilter } from './data-table-with-columns'
 
 interface DataTableFacetedFilterProps<TData> {
 	column?: Column<TData>

@@ -1,7 +1,7 @@
 'use client'
 import { Toaster } from '@components/ui/sonner'
 import { TRPCReactProvider } from '@lib/trpc/react'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { createRouter, RouterProvider } from '@tanstack/react-router'
 import { ThemeProvider } from 'next-themes'
 import { StrictMode, Suspense } from 'react'
 import { routeTree } from './routeTree.gen'
@@ -15,7 +15,6 @@ declare module '@tanstack/react-router' {
 		router: typeof router
 	}
 }
-
 
 export function Bootstrap() {
 	return (

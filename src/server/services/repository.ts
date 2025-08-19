@@ -1,4 +1,3 @@
-
 import type { z } from 'zod/v4'
 
 export interface SchemaRepositoryOptions<T extends z.ZodTypeAny> {
@@ -47,9 +46,9 @@ export function createRepository<
 	// Populate with seeder data if provided
 	if (opts.seeder) {
 		for (const item of opts.seeder) {
-			// @ts-ignore
+			// @ts-expect-error
 			const { id } = item
-			
+
 			if (id) {
 				db.set(id, item)
 			}
@@ -75,7 +74,6 @@ export function createRepository<
 				hasPrev,
 				currentPage,
 				page,
-
 			},
 		}
 	}
@@ -148,7 +146,9 @@ export function createRepository<
 				return [null, result]
 			} catch (error) {
 				if (hooks?.onError) {
-					hooks.onError(error instanceof Error ? error : new Error(String(error)))
+					hooks.onError(
+						error instanceof Error ? error : new Error(String(error)),
+					)
 				}
 				return [
 					error instanceof Error ? error : new Error(String(error)),
@@ -188,7 +188,9 @@ export function createRepository<
 				return [null, result]
 			} catch (error) {
 				if (hooks?.onError) {
-					hooks.onError(error instanceof Error ? error : new Error(String(error)))
+					hooks.onError(
+						error instanceof Error ? error : new Error(String(error)),
+					)
 				}
 				return [
 					error instanceof Error ? error : new Error(String(error)),
@@ -224,14 +226,16 @@ export function createRepository<
 					// Hard delete
 					db.delete(id)
 				}
-				
+
 				if (hooks?.onCompleteBeforeReturn) {
 					hooks.onCompleteBeforeReturn(schema.parse(existing))
 				}
 				return { success: true }
 			} catch (error) {
 				if (hooks?.onError) {
-					hooks.onError(error instanceof Error ? error : new Error(String(error)))
+					hooks.onError(
+						error instanceof Error ? error : new Error(String(error)),
+					)
 				}
 				return { success: false, message: String(error) }
 			}
@@ -328,14 +332,35 @@ export function createRepository<
 				return !cursor || itemDate > cursor
 			})
 			const startIndex = (page - 1) * actualPageSize
-			const paginatedData = results.slice(startIndex, startIndex + actualPageSize)
-			const nextCursor = paginatedData.length > 0
-				? (paginatedData[paginatedData.length - 1] as Record<string, unknown>).createdAt as Date
-				: null	
+			const paginatedData = results.slice(
+				startIndex,
+				startIndex + actualPageSize,
+			)
+			const nextCursor =
+				paginatedData.length > 0
+					? ((
+							paginatedData[paginatedData.length - 1] as Record<string, unknown>
+						).createdAt as Date)
+					: null
 			const data = schema.array().parse(paginatedData)
+			const prevCursor =
+				paginatedData.length > 0
+					? ((paginatedData[0] as Record<string, unknown>).createdAt as Date)
+					: null
+
 			return {
 				items: data,
 				nextCursor,
+				prevCursor,
+				total: results.length,
+				pagination: {
+					page,
+					pageSize: actualPageSize,
+					hasNext: page * actualPageSize < results.length,
+					hasPrev: page > 1,
+					currentPage: page,
+					lastPageIndex: Math.ceil(results.length / actualPageSize) - 1,
+				},
 			}
 		},
 		findByWithCursor: (criteria, cursor, options = {}) => {
@@ -344,7 +369,8 @@ export function createRepository<
 			const results = Array.from(db.values()).filter((item) => {
 				const itemRecord = item as Record<string, unknown>
 				const itemDate = itemRecord.createdAt as Date
-				return (!cursor || itemDate > cursor) &&
+				return (
+					(!cursor || itemDate > cursor) &&
 					Object.entries(criteria).every(([key, value]) => {
 						const itemValue = itemRecord[key]
 						if (typeof itemValue === 'string' && typeof value === 'string') {
@@ -352,16 +378,37 @@ export function createRepository<
 						}
 						return itemValue === value
 					})
+				)
 			})
 			const startIndex = (page - 1) * actualPageSize
-			const paginatedData = results.slice(startIndex, startIndex + actualPageSize)
-			const nextCursor = paginatedData.length > 0
-				? (paginatedData[paginatedData.length - 1] as Record<string, unknown>).createdAt as Date
-				: null
+			const paginatedData = results.slice(
+				startIndex,
+				startIndex + actualPageSize,
+			)
+			const nextCursor =
+				paginatedData.length > 0
+					? ((
+							paginatedData[paginatedData.length - 1] as Record<string, unknown>
+						).createdAt as Date)
+					: null
 			const data = schema.array().parse(paginatedData)
+			const prevCursor =
+				paginatedData.length > 0
+					? ((paginatedData[0] as Record<string, unknown>).createdAt as Date)
+					: null
 			return {
 				items: data,
 				nextCursor,
+				prevCursor,
+				total: results.length,
+				pagination: {
+					page,
+					pageSize: actualPageSize,
+					hasNext: page * actualPageSize < results.length,
+					hasPrev: page > 1,
+					currentPage: page,
+					lastPageIndex: Math.ceil(results.length / actualPageSize) - 1,
+				},
 			}
 		},
 		findMatchWithCursor: (criteria, cursor, options = {}) => {
@@ -370,7 +417,8 @@ export function createRepository<
 			const results = Array.from(db.values()).filter((item) => {
 				const itemRecord = item as Record<string, unknown>
 				const itemDate = itemRecord.createdAt as Date
-				return (!cursor || itemDate > cursor) &&
+				return (
+					(!cursor || itemDate > cursor) &&
 					Object.entries(criteria).some(([key, value]) => {
 						const itemValue = itemRecord[key]
 						if (typeof itemValue === 'string' && typeof value === 'string') {
@@ -378,18 +426,39 @@ export function createRepository<
 						}
 						return itemValue === value
 					})
+				)
 			})
 			const startIndex = (page - 1) * actualPageSize
-			const paginatedData = results.slice(startIndex, startIndex + actualPageSize)
-			const nextCursor = paginatedData.length > 0
-				? (paginatedData[paginatedData.length - 1] as Record<string, unknown>).createdAt as Date
-				: null
+			const paginatedData = results.slice(
+				startIndex,
+				startIndex + actualPageSize,
+			)
+			const nextCursor =
+				paginatedData.length > 0
+					? ((
+							paginatedData[paginatedData.length - 1] as Record<string, unknown>
+						).createdAt as Date)
+					: null
 			const data = schema.array().parse(paginatedData)
+			const prevCursor =
+				paginatedData.length > 0
+					? ((paginatedData[0] as Record<string, unknown>).createdAt as Date)
+					: null
 			return {
 				items: data,
 				nextCursor,
+				prevCursor,
+				total: results.length,
+				pagination: {
+					page,
+					pageSize: actualPageSize,
+					hasNext: page * actualPageSize < results.length,
+					hasPrev: page > 1,
+					currentPage: page,
+					lastPageIndex: Math.ceil(results.length / actualPageSize) - 1,
+				},
 			}
-		},	
+		},
 		db,
 		entityName,
 	}

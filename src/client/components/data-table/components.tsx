@@ -1,14 +1,3 @@
-import { Skeleton } from '@/client/components/ui/skeleton'
-
-import {
-	Table as BaseTable,
-	TableBody as BaseTableBody,
-	TableCell as BaseTableCell,
-	TableHead as BaseTableHead,
-	TableHeader as BaseTableHeader,
-	TableRow as BaseTableRow,
-} from '@/client/components/ui/table'
-import { cn } from '@/lib/utils'
 import type {
 	Cell,
 	Header,
@@ -18,6 +7,16 @@ import type {
 } from '@tanstack/react-table'
 import type { VirtualItem, Virtualizer } from '@tanstack/react-virtual'
 import React from 'react'
+import { Skeleton } from '@/client/components/ui/skeleton'
+import {
+	Table as BaseTable,
+	TableBody as BaseTableBody,
+	TableCell as BaseTableCell,
+	TableHead as BaseTableHead,
+	TableHeader as BaseTableHeader,
+	TableRow as BaseTableRow,
+} from '@/client/components/ui/table'
+import { cn } from '@/lib/utils'
 
 // Base Table Component
 interface TableProps<TableData = unknown>

@@ -2,11 +2,9 @@ import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import type { Table } from '@tanstack/react-table'
 
 import { Settings2 } from 'lucide-react'
-
+import type { JSX } from 'react'
 import { Button } from '@/client/components/ui/button'
 import * as DM from '@/client/components/ui/dropdown-menu'
-
-import type { JSX } from 'react'
 
 interface DataTableViewOptionsProps<TData> {
 	table: Table<TData>

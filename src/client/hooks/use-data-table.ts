@@ -2,16 +2,16 @@ import {
 	type ColumnDef,
 	type ColumnFiltersState,
 	type ColumnSizingState,
-	type RowSelectionState,
-	type SortingState,
-	type VisibilityState,
 	getCoreRowModel,
 	getFacetedRowModel,
 	getFacetedUniqueValues,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
+	type RowSelectionState,
+	type SortingState,
 	useReactTable,
+	type VisibilityState,
 } from '@tanstack/react-table'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React from 'react'
@@ -240,40 +240,6 @@ export function useDataTable<TData, TValue>({
 	}
 }
 
-// Custom hook for column order management (for drag & drop)
-export function useColumnOrderManagement(initialOrder: string[]) {
-	const [columnOrder, setColumnOrder] = React.useState(initialOrder)
-
-	const handleDragEnd = React.useCallback(
-		(activeId: string, overId: string) => {
-			setColumnOrder((prev) => {
-				const oldIndex = prev.indexOf(activeId)
-				const newIndex = prev.indexOf(overId)
-
-				if (oldIndex === -1 || newIndex === -1) return prev
-
-				const newOrder = [...prev]
-				newOrder.splice(oldIndex, 1)
-				newOrder.splice(newIndex, 0, activeId)
-				return newOrder
-			})
-		},
-		[],
-	)
-
-	const resetOrder = React.useCallback(() => {
-		setColumnOrder(initialOrder)
-	}, [initialOrder])
-
-	return {
-		columnOrder,
-		setColumnOrder,
-		handleDragEnd,
-		resetOrder,
-	}
-}
-
-// Table state actions
 type TableStateAction =
 	| { type: 'SET_SORTING'; payload: SortingState }
 	| { type: 'SET_COLUMN_FILTERS'; payload: ColumnFiltersState }

@@ -1,4 +1,3 @@
-import { type Commit, commitSchema } from '@server/schemas/commit.schema'
 import {
 	rand,
 	randCompanyName,
@@ -11,10 +10,11 @@ import {
 	randSoonDate,
 	randUuid,
 } from '@ngneat/falso'
+import { type Commit, commitSchema } from '@server/schemas/commit.schema'
 import { createRepository } from '@server/services/repository'
 export const commitRepository = createRepository(commitSchema, {
 	entityName: 'Commit',
-	defaultPageSize: 25,
+	defaultPageSize: 200,
 	maxPageSize: Number.MAX_SAFE_INTEGER,
 	seeder: Array.from({ length: 10_000 }, () => {
 		const id = randUuid()

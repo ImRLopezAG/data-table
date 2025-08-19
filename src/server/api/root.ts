@@ -1,13 +1,13 @@
 // Remove observable import - no longer needed
 // import { observable } from '@trpc/server/observable'
 import { EventEmitter, on } from 'node:events'
+import { commitsRouter } from '@server/api/routes/commit'
+import { todosRouter } from '@server/api/routes/todos'
 import {
 	createCallerFactory,
 	createTRPCRouter,
 	publicProcedure,
 } from '@/server/api/trpc'
-import { todosRouter } from '@server/api/routes/todos'
-import { commitsRouter } from '@server/api/routes/commit'
 
 // Create EventEmitter instance for the subscription
 const ee = new EventEmitter()

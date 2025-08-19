@@ -1,7 +1,7 @@
-import server from '@/server'
 import client from '@client/renderer'
 import { Hono } from 'hono'
 import { logger } from 'hono/logger'
+import server from '@/server'
 
 const app = new Hono()
 

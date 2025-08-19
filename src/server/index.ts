@@ -2,6 +2,7 @@ import { createContext } from '@lib/trpc/server'
 import { appRouter } from '@server/api/root'
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 import { Hono } from 'hono'
+
 const api = new Hono<{ Bindings: CloudflareBindings }>()
 
 api.use('/trpc/*', (c) => {

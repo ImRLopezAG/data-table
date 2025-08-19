@@ -1,8 +1,9 @@
-import { Checkbox } from '@/client/components/ui/checkbox'
 import type { ColumnDef, Row, Table } from '@tanstack/react-table'
 import { EllipsisVerticalIcon } from 'lucide-react'
 import React from 'react'
+import { Checkbox } from '@/client/components/ui/checkbox'
 import { DataTableColumnHeader } from './data-table-column-header'
+
 interface Props<TData> {
 	columns: Array<ColumnDef<TData>>
 	rowAction?: (row: Row<TData>) => React.ReactNode
@@ -149,7 +150,13 @@ function selectionColumn<TData>(): ColumnDef<TData> {
 				(value: boolean) => row.toggleSelected(!!value),
 				[row],
 			)
-			return <Checkbox checked={checked} onCheckedChange={onCheckedChange} className='min-size-6' />
+			return (
+				<Checkbox
+					checked={checked}
+					onCheckedChange={onCheckedChange}
+					className='min-size-6'
+				/>
+			)
 		},
 	}
 }

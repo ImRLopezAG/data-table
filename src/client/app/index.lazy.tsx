@@ -4,28 +4,24 @@ import { Calendar } from '@components/ui/calendar'
 import { Checkbox } from '@components/ui/checkbox'
 import { Label } from '@components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
-import { createLazyFileRoute } from '@tanstack/react-router'
-import {
-	ChevronLeft,
-	ChevronRight,
-	ChevronsLeft,
-	ChevronsRight,
-} from 'lucide-react'
-import { useState } from 'react'
-
-import { cn } from '@/lib/utils'
-import type { Commit } from '@server/schemas/commit.schema'
-
 import { useCommits } from '@hooks/use-commits'
 import { dates, values } from '@lib/utils'
+import type { Commit } from '@server/schemas/commit.schema'
+import { createLazyFileRoute } from '@tanstack/react-router'
 import {
 	CalendarClock,
 	CheckCircle,
 	ChevronDown,
+	ChevronLeft,
+	ChevronRight,
+	ChevronsLeft,
+	ChevronsRight,
 	HelpCircle,
 	Loader2,
 	XCircle,
 } from 'lucide-react'
+
+import { cn } from '@lib/utils'
 export const Route = createLazyFileRoute('/')({
 	component: Index,
 })
@@ -66,7 +62,6 @@ function Index() {
 						Draggable
 					</Label>
 					<Checkbox
-						id='draggable'
 						checked={draggable}
 						onCheckedChange={toggleDraggable}
 						className='peer baseline'
@@ -177,9 +172,8 @@ function Index() {
 						editable
 					>
 						{({ row }) => {
-							const [open, setOpen] = useState(false)
 							return (
-								<Popover open={open} onOpenChange={setOpen}>
+								<Popover>
 									<PopoverTrigger asChild>
 										<div className='flex h-full w-full items-center justify-between'>
 											<Button variant='ghost' className='h-6 px-2'>

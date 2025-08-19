@@ -1,5 +1,4 @@
 import EventEmitter, { on } from 'node:events'
-import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
 import {
 	type Todo,
 	todoMutationSchema,
@@ -8,6 +7,8 @@ import {
 import { todoRepository } from '@server/services/todos'
 import { TRPCError, tracked } from '@trpc/server'
 import { z } from 'zod/v4'
+import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
+
 type TodoEventMap = {
 	mutate: [todo: Todo]
 	delete: [id: string]
@@ -25,6 +26,9 @@ class TodoEventEmitter extends EventEmitter<TodoEventMap> {
 export const todoEmitter = new TodoEventEmitter()
 
 export const todosRouter = createTRPCRouter({
+	list: publicProcedure.query(async () => {
+		return todoRepository.findAll()
+	}),
 	getTodos: publicProcedure.subscription(async function* ({ signal }) {
 		const data = todoRepository.findAll()
 		for (const todo of data) {

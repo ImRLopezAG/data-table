@@ -24,23 +24,26 @@ export function createFetcher<T = unknown>(config: FetcherConfig<T> = {}) {
 				if (config.onUnsuccessfulResponse)
 					return await config.onUnsuccessfulResponse(response, args)
 
-				return [Error(`Request failed with status ${response.status}, ${response.statusText}`), undefined]
+				return [
+					Error(
+						`Request failed with status ${response.status}, ${response.statusText}`,
+					),
+					undefined,
+				]
 			}
 
 			if (config.handleResponse) return await config.handleResponse(response)
 
 			const contentType = response.headers.get('Content-Type')
 			if (!contentType?.includes('application/json')) {
-				return [
-					Error('Unexpected non-JSON response'),
-					undefined,
-				]
+				return [Error('Unexpected non-JSON response'), undefined]
 			}
 
 			const data = await response.json()
 			return [undefined, data as T]
 		} catch (error) {
-			const appError = error instanceof Error ? error : new Error('Unknown error occurred')
+			const appError =
+				error instanceof Error ? error : new Error('Unknown error occurred')
 
 			if (config.onError) await config.onError(appError)
 

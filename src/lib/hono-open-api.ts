@@ -1,4 +1,4 @@
-import { type RouteConfig, createRoute } from '@hono/zod-openapi'
+import { createRoute, type RouteConfig } from '@hono/zod-openapi'
 import { z } from 'zod'
 
 export const errorSchema = (defaultMessage = 'Internal Server Error') =>

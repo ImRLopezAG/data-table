@@ -26,6 +26,9 @@ class CommitEventEmitter extends EventEmitter<CommitEventMap> {
 export const commitEmitter = new CommitEventEmitter()
 
 export const commitsRouter = createTRPCRouter({
+	list: publicProcedure.query(async () => {
+		return commitRepository.findAll()
+	}),
 	getCommits: publicProcedure.subscription(async function* ({ signal }) {
 		const data = commitRepository.findAll()
 		for (const commit of data) {
