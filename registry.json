@@ -113,6 +113,21 @@
 					"type": "registry:lib"
 				}
 			]
+		},
+		{
+			"name": "pdf",
+			"type": "registry:lib",
+			"title": "PDF",
+			"author": "Angel Lopez",
+			"description": "A simple PDF generator using pdfmake",
+			"dependencies": ["pdfmake"],
+			"devDependencies": ["@types/pdfmake"],
+			"files": [
+				{
+					"path": "./src/lib/pdf.ts",
+					"type": "registry:lib"
+				}
+			]
 		}
 	]
 }

@@ -35,4 +35,35 @@ api.use('/trpc/*', (c) => {
 	})
 })
 
+api.get('/r/:name', async ({ req, env }) => {
+	try {
+		const name = req.param('name')
+
+		if (!name) {
+			return new Response('Name is required', { status: 400 })
+		}
+
+		const url = new URL(req.url)
+		const assetPath = import.meta.env.PROD
+			? `assets/${name}.json`
+			: `/dist/client/assets/${name}.json`
+
+		url.pathname = assetPath
+		const asset = await env.ASSETS.fetch(url.toString())
+
+		if (!asset.ok) {
+			return new Response('Component not found', { status: 404 })
+		}
+		const response = await asset.text()
+
+		return new Response(response, {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+	} catch (error) {
+		return new Response('Internal Server Error', { status: 500 })
+	}
+})
+
 export default api
